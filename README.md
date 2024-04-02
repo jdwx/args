@@ -1,11 +1,11 @@
 # jdwx/args
 PHP library for handling command-line arguments
 
-This is intended for parsing CLI arguments. This could mean arguments presented on the shell command line, e.g.:
-
 It's designed to provide methods for safely retrieving most common argument types,
 including strings, integers, floating point values, boolean flags, sets of keywords,
 filenames, hostnames, IP addresses, and email addresses.
+
+It's useful for handling arguments presented to a PHP script on the shell command line, e.g.:
 
 ```bash
 YourPrompt$ ./example.php Hello, world.
