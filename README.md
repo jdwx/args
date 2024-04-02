@@ -39,8 +39,8 @@ require 'vendor/autoload.php';
 
 $args = new JDWX\Args\Arguments( $argv );
 
-# Based on the example above, $st now equals "Hello,"
 $st = $args->shiftString();
+# Based on the shell example above, $st now equals "Hello,"
 ```
 
 All "shift" methods throw an exception if an argument exists but is invalid:
