@@ -1,5 +1,7 @@
 {
   "name": "jdwx/args",
+  "description": "A simple PHP library for parsing command line arguments.",
+  "license": "MIT",
   "autoload": {
     "psr-4": {
       "JDWX\\Args\\": "src/"
