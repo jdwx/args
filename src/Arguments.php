@@ -11,7 +11,7 @@ use Countable;
 use LogicException;
 
 
-class Arguments implements Countable {
+class Arguments extends ArgumentParser implements Countable {
 
 
     public function __construct( protected array $args ) {
@@ -160,19 +160,7 @@ class Arguments implements Countable {
         if ( $nst === null ) {
             return null;
         }
-        switch ( $nst ) {
-            case 'true':
-            case 'yes':
-            case 'on':
-            case '1':
-                return true;
-            case "false":
-            case 'no':
-            case 'off':
-            case '0':
-                return false;
-        }
-        throw new BadArgumentException( $nst, "Invalid boolean value" );
+        return self::parseBool( $nst );
     }
 
 
@@ -190,10 +178,7 @@ class Arguments implements Countable {
         if ( ! is_string( $nst ) ) {
             return null;
         }
-        if ( ! filter_var( $nst, FILTER_VALIDATE_EMAIL ) ) {
-            throw new BadArgumentException( $nst, "Invalid email address" );
-        }
-        return $nst;
+        return self::parseEmailAddress( $nst );
     }
 
 
@@ -217,8 +202,7 @@ class Arguments implements Countable {
             $o_nstFilename = null;
             return null;
         }
-        $o_nstFilename = $nst;
-        return file_get_contents( $nst );
+        return self::parseExistingFileBody( $nst, $o_nstFilename );
     }
 
 
@@ -242,10 +226,7 @@ class Arguments implements Countable {
         if ( ! is_string( $nst ) ) {
             return null;
         }
-        if ( ! file_exists( $nst ) ) {
-            throw new BadArgumentException( $nst, "Filename does not exist" );
-        }
-        return $nst;
+        return self::parseExistingFilename( $nst );
     }
 
 
@@ -272,14 +253,7 @@ class Arguments implements Countable {
         if ( $nst === null ) {
             return null;
         }
-        if ( ! is_numeric( $nst ) ) {
-            throw new BadArgumentException( $nst, "Invalid floating-point number" );
-        }
-        $f = floatval( $nst );
-        if ( $f < $i_fMin || $f >= $i_fMax ) {
-            throw new BadArgumentException( $nst, "Float outside of range [{$i_fMin}, {$i_fMax})" );
-        }
-        return $f;
+        return self::parseFloat( $nst, $i_fMin, $i_fMax );
     }
 
 
@@ -298,12 +272,7 @@ class Arguments implements Countable {
         if ( ! is_string( $nst ) ) {
             return null;
         }
-        if ( str_ends_with( $nst, '.' )
-                || !str_contains( $nst, '.' )
-                || ! filter_var( $nst, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME ) ) {
-            throw new BadArgumentException( $nst, "Invalid hostname" );
-        }
-        return $nst;
+        return self::parseHostname( $nst );
     }
 
 
@@ -322,14 +291,7 @@ class Arguments implements Countable {
         if ( $nst === null ) {
             return null;
         }
-        if ( ! is_numeric( $nst ) ) {
-            throw new BadArgumentException( $nst, "Expected integer" );
-        }
-        $i = intval( $nst );
-        if ( $i < $i_iMin || $i > $i_iMax ) {
-            throw new BadArgumentException( $nst, "Integer out of range: [{$i_iMin}, {$i_iMax}]" );
-        }
-        return $i;
+        return self::parseInteger( $nst, $i_iMin, $i_iMax );
     }
 
 
@@ -348,10 +310,7 @@ class Arguments implements Countable {
         if ( ! is_string( $nst ) ) {
             return null;
         }
-        if ( ! filter_var( $nst, FILTER_VALIDATE_IP ) ) {
-            throw new BadArgumentException( $nst, "Invalid IP address" );
-        }
-        return $nst;
+        return self::parseIPAddress( $nst );
     }
 
 
@@ -369,10 +328,7 @@ class Arguments implements Countable {
         if ( ! is_string( $nst ) ) {
             return null;
         }
-        if ( ! filter_var( $nst, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
-            throw new BadArgumentException( $nst, "Invalid IPv4 address" );
-        }
-        return $nst;
+        return self::parseIPv4Address( $nst );
     }
 
 
@@ -390,10 +346,7 @@ class Arguments implements Countable {
         if ( ! is_string( $nst ) ) {
             return null;
         }
-        if ( ! filter_var( $nst, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ) {
-            throw new BadArgumentException( $nst,"Invalid IPv6 address" );
-        }
-        return $nst;
+        return self::parseIPv6Address( $nst );
     }
 
 
@@ -411,11 +364,7 @@ class Arguments implements Countable {
         if ( $nst === null ) {
             return null;
         }
-        if ( in_array( $nst, $i_rstKeywords ) ) {
-            return $nst;
-        }
-        $stKeywords = self::summarizeKeywords( $i_rstKeywords );
-        throw new BadArgumentException( $nst, "Expected keyword ({$stKeywords})" );
+        return self::parseKeywords( $nst, $i_rstKeywords );
     }
 
 
@@ -438,14 +387,7 @@ class Arguments implements Countable {
         if ( ! is_string( $nst ) ) {
             return null;
         }
-        if ( file_exists( $nst ) ) {
-            throw new BadArgumentException( $nst, "File exists" );
-        }
-        $stDir = dirname( $nst );
-        if ( $stDir && ! is_dir( $stDir ) ) {
-            throw new BadArgumentException( $nst, "Directory does not exist" );
-        }
-        return $nst;
+        return self::parseNonexistentFilename( $nst );
     }
 
 
@@ -463,12 +405,20 @@ class Arguments implements Countable {
 
 
     public function shiftPositiveInteger( int $i_iMax = PHP_INT_MAX ) : ?int {
-        return $this->shiftInteger( 1, $i_iMax );
+        $nst = $this->shiftString();
+        if ( $nst === null ) {
+            return null;
+        }
+        return self::parsePositiveInteger( $nst, $i_iMax );
     }
 
 
     public function shiftPositiveIntegerEx( int $i_iMax = PHP_INT_MAX ) : int {
-        return $this->shiftIntegerEx( 1, $i_iMax );
+        $ni = $this->shiftPositiveInteger( $i_iMax );
+        if ( is_int( $ni ) ) {
+            return $ni;
+        }
+        throw new MissingArgumentException( "Missing positive integer argument" );
     }
 
 
@@ -490,20 +440,20 @@ class Arguments implements Countable {
 
 
     public function shiftUnsignedInteger( int $i_iMax = PHP_INT_MAX ) : ?int {
-        return $this->shiftInteger( 0, $i_iMax );
+        $nst = $this->shiftString();
+        if ( $nst === null ) {
+            return null;
+        }
+        return self::parseUnsignedInteger( $nst, $i_iMax );
     }
 
 
     public function shiftUnsignedIntegerEx( int $i_iMax = PHP_INT_MAX ) : int {
-        return $this->shiftIntegerEx( 0, $i_iMax );
-    }
-
-
-    public static function summarizeKeywords( array $i_rKeywords ) : string {
-        if ( count( $i_rKeywords ) > 5 ) {
-            return join( ", ", array_slice( $i_rKeywords, 0, 4 ) ) . ", ...";
+        $ni = $this->shiftUnsignedInteger( $i_iMax );
+        if ( is_int( $ni ) ) {
+            return $ni;
         }
-        return join( ", ", $i_rKeywords );
+        throw new MissingArgumentException( "Missing unsigned integer argument" );
     }
 
 
