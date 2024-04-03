@@ -104,6 +104,20 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    public function handleOptionsDefined( array $i_rstOptions ) : array {
+        $rOptions = $this->handleOptions();
+        foreach ( $rOptions as $stKey => $bstValue ) {
+            if ( ! in_array( $stKey, $i_rstOptions ) ) {
+                if ( is_bool( $bstValue ) ) {
+                    throw new BadArgumentException( $bstValue ? "true" : "false", "Unknown option \"{$stKey}\"" );
+                }
+                throw new BadArgumentException( $bstValue, "Unknown option \"{$stKey}\"" );
+            }
+        }
+        return $rOptions;
+    }
+
+
     /**
      * This is similar to shiftKeywords() but does not treat a mismatch as an error,
      * instead returning null.
