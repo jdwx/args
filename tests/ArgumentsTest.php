@@ -64,6 +64,31 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testHandleOptionsDefined() : void {
+        $args = new Arguments( [ '--foo=bar', '--baz', 'Hello', '--no-qux', '--', '--quux', 'world!' ] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo', 'baz', 'qux' ] );
+        self::assertEquals( 'bar', $rOptions[ 'foo' ] );
+        self::assertTrue( $rOptions[ 'baz' ] );
+        self::assertFalse( $rOptions[ 'qux' ] );
+        self::assertCount( 3, $rOptions );
+        self::assertEquals( [ 'Hello', '--quux', 'world!' ], $args->endWithArray() );
+    }
+
+
+    public function testHandleOptionsDefinedForBadOptionForBoolean() : void {
+        $args = new Arguments( [ '--foo=bar', '--baz', 'Hello', '--no-qux', '--', '--quux', 'world!' ] );
+        self::expectException( BadArgumentException::class );
+        $args->handleOptionsDefined( [ 'foo', 'baz' ] );
+    }
+
+
+    public function testHandleOptionsDefinedForBadOptionForString() : void {
+        $args = new Arguments( [ '--foo=bar', '--baz', 'Hello', '--qux=quux', '--', '--quux', 'world!' ] );
+        self::expectException( BadArgumentException::class );
+        $args->handleOptionsDefined( [ 'foo', 'baz' ] );
+    }
+
+
     public function testPeekKeywords() : void {
         $rKeywords = [ 'foo', 'bar' ];
         $args = new Arguments( [ 'foo', 'bar', 'baz' ] );
