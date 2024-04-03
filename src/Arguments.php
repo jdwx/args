@@ -29,6 +29,17 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
+     * Asserts that we have handled all arguments.
+     */
+    public function end() : void {
+        if ( $this->empty() ) {
+            return;
+        }
+        throw new ExtraArgumentsException( $this->args );
+    }
+
+
+    /**
      * Returns the remaining unprocessed arguments as an array.
      */
     public function endWithArray() : array {

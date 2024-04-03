@@ -3,6 +3,7 @@
 
 use JDWX\Args\Arguments;
 use JDWX\Args\BadArgumentException;
+use JDWX\Args\ExtraArgumentsException;
 use JDWX\Args\MissingArgumentException;
 use PHPUnit\Framework\TestCase;
 
@@ -17,6 +18,13 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testForExtraArguments() : void {
+        $args = new Arguments( [ 'Hello', 'world!' ] );
+        self::expectException( ExtraArgumentsException::class );
+        $args->end();
+    }
+
+
     public function testEmpty() : void {
         $args = new Arguments( [] );
         self::assertTrue( $args->empty() );
@@ -25,6 +33,8 @@ class ArgumentsTest extends TestCase {
         $args->shiftString();
         $args->shiftString();
         self::assertTrue( $args->empty() );
+        self::assertEmpty( $args );
+        $args->end();
     }
 
 
@@ -390,7 +400,7 @@ class ArgumentsTest extends TestCase {
         $st = __DIR__ . PATH_SEPARATOR . 'nonexistent-file-xyz123';
         $args = new Arguments( [ $st ] );
         self::assertEquals( $st, $args->shiftNonexistentFilename() );
-        self::assertEmpty( $args );
+        $args->end();
         self::assertNull( $args->shiftNonexistentFilename() );
     }
 
@@ -414,7 +424,7 @@ class ArgumentsTest extends TestCase {
         $st = __DIR__ . PATH_SEPARATOR . 'nonexistent-file-xyz123';
         $args = new Arguments( [ $st ] );
         self::assertEquals( $st, $args->shiftNonexistentFilenameEx() );
-        self::assertEmpty( $args );
+        $args->end();
         self::expectException( MissingArgumentException::class );
         $args->shiftNonexistentFilenameEx();
     }
@@ -426,7 +436,7 @@ class ArgumentsTest extends TestCase {
         self::assertEquals( 456, $args->shiftPositiveInteger() );
         self::assertEquals( 78, $args->shiftPositiveInteger() );
         self::assertNull( $args->shiftPositiveInteger() );
-        self::assertEmpty( $args );
+        $args->end();
     }
 
 
@@ -463,7 +473,7 @@ class ArgumentsTest extends TestCase {
         $args = new Arguments( [ 'Hello', 'world!' ] );
         self::assertEquals( 'Hello', $args->shiftString() );
         self::assertEquals( 'world!', $args->shiftString() );
-        self::assertEmpty( $args );
+        $args->end();
         self::assertNull( $args->shiftString() );
     }
 
@@ -483,7 +493,7 @@ class ArgumentsTest extends TestCase {
         self::assertEquals( 0, $args->shiftUnsignedInteger() );
         self::assertEquals( 78, $args->shiftUnsignedInteger() );
         self::assertNull( $args->shiftUnsignedInteger() );
-        self::assertEmpty( $args );
+        $args->end();
     }
 
 
