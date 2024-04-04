@@ -403,6 +403,25 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    public function shiftMap( array $i_rMap ) : ?string {
+        $nst = $this->shiftString();
+        if ( $nst === null ) {
+            return null;
+        }
+        return self::parseMap( $nst, $i_rMap );
+    }
+
+
+    public function shiftMapEx( array $i_rMap ) : string {
+        $nst = $this->shiftMap( $i_rMap );
+        if ( is_string( $nst ) ) {
+            return $nst;
+        }
+        $stKeywords = self::summarizeKeywords( array_keys( $i_rMap ) );
+        throw new MissingArgumentException( "Missing one of ({$stKeywords}) argument" );
+    }
+
+
     /**
      * Expects an argument specifying a filename that does not currently exist,
      * but could be created. E.g., any referenced parent directories must exist.

@@ -421,6 +421,33 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testShiftMap() : void {
+        $rMap = [ 'foo' => 'bar', 'baz' => 'qux' ];
+        $args = new Arguments( [ 'foo', 'baz' ] );
+        self::assertEquals( 'bar', $args->shiftMap( $rMap ) );
+        self::assertEquals( 'qux', $args->shiftMap( $rMap ) );
+        self::assertNull( $args->shiftMap( $rMap ) );
+    }
+
+
+    public function testShiftMapForNotKey() : void {
+        $rMap = [ 'foo' => 'bar', 'baz' => 'qux' ];
+        $args = new Arguments( [ 'foo', 'quux' ] );
+        self::assertEquals( 'bar', $args->shiftMap( $rMap ) );
+        self::expectException( BadArgumentException::class );
+        $args->shiftMap( $rMap );
+    }
+
+
+    public function testShiftMapEx() : void {
+        $rMap = [ 'foo' => 'bar', 'baz' => 'qux' ];
+        $args = new Arguments( [ 'foo' ] );
+        self::assertEquals( 'bar', $args->shiftMapEx( $rMap ) );
+        self::expectException( MissingArgumentException::class );
+        $args->shiftMapEx( $rMap );
+    }
+
+
     public function testShiftNonexistentFilename() : void {
         $st = __DIR__ . PATH_SEPARATOR . 'nonexistent-file-xyz123';
         $args = new Arguments( [ $st ] );

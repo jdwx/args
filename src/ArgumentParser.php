@@ -118,6 +118,16 @@ class ArgumentParser {
     }
 
 
+    /** @param string[] $i_rMap */
+    public static function parseMap( string $i_st, array $i_rMap ) : string {
+        if ( ! array_key_exists( $i_st, $i_rMap ) ) {
+            $stKeywords = self::summarizeKeywords( array_keys( $i_rMap ) );
+            throw new BadArgumentException( $i_st, "Expected one of ({$stKeywords})" );
+        }
+        return $i_rMap[ $i_st ];
+    }
+
+
     public static function parseNonexistentFilename( string $i_st ) : string {
         if ( file_exists( $i_st ) ) {
             throw new BadArgumentException( $i_st, "File exists" );
