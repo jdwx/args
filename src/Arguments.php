@@ -120,7 +120,8 @@ class Arguments extends ArgumentParser implements Countable {
 
     /**
      * This is similar to shiftKeywords() but does not treat a mismatch as an error,
-     * instead returning null.
+     * instead returning null. Unlike peekString(), this method returns the whole match
+     * so you can tell which keyword matched.
      */
     public function peekKeywords( array $i_rKeywords, bool $i_bConsume = false ) : ?string {
         if ( 0 == count( $this->args ) ) {
@@ -180,7 +181,19 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    /** @deprecated */
     public function shiftBool() : ?bool {
+        return $this->shiftBoolean();
+    }
+
+
+    /** @deprecated */
+    public function shiftBoolEx() : bool {
+        return $this->shiftBooleanEx();
+    }
+
+
+    public function shiftBoolean() : ?bool {
         $nst = $this->shiftString();
         if ( $nst === null ) {
             return null;
@@ -189,8 +202,8 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftBoolEx() : bool {
-        $nb = $this->shiftBool();
+    public function shiftBooleanEx() : bool {
+        $nb = $this->shiftBoolean();
         if ( is_bool( $nb ) ) {
             return $nb;
         }

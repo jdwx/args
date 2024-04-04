@@ -114,26 +114,32 @@ class ArgumentsTest extends TestCase {
     }
 
 
-    public function testShiftBool() : void {
+    public function testShiftBoolean() : void {
         $args = new Arguments( [ 'true', 'yes', 'on', '1', 'false', 'no', 'off', '0', 'foo' ] );
-        self::assertTrue( $args->shiftBool() );
-        self::assertTrue( $args->shiftBool() );
-        self::assertTrue( $args->shiftBool() );
-        self::assertTrue( $args->shiftBool() );
-        self::assertFalse( $args->shiftBool() );
-        self::assertFalse( $args->shiftBool() );
-        self::assertFalse( $args->shiftBool() );
-        self::assertFalse( $args->shiftBool() );
+        self::assertTrue( $args->shiftBoolean() );
+        self::assertTrue( $args->shiftBoolean() );
+        self::assertTrue( $args->shiftBoolean() );
+        self::assertTrue( $args->shiftBoolean() );
+        self::assertFalse( $args->shiftBoolean() );
+        self::assertFalse( $args->shiftBoolean() );
+        self::assertFalse( $args->shiftBoolean() );
+        self::assertFalse( $args->shiftBoolean() );
         self::expectException( BadArgumentException::class );
-        $args->shiftBool();
+        $args->shiftBoolean();
     }
 
 
-    public function testShiftBoolEx() : void {
+    public function testShiftBooleanForNoArg() : void {
+        $args = new Arguments( [] );
+        self::assertNull( $args->shiftBoolean() );
+    }
+
+
+    public function testShiftBooleanEx() : void {
         $args = new Arguments( [ 'true' ] );
-        self::assertTrue( $args->shiftBoolEx() );
+        self::assertTrue( $args->shiftBooleanEx() );
         self::expectException( MissingArgumentException::class );
-        $args->shiftBoolEx();
+        $args->shiftBooleanEx();
     }
 
 
