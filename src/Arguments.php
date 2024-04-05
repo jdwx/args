@@ -181,13 +181,13 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    /** @deprecated */
+    /** @deprecated Preserve until 1.1.0 */
     public function shiftBool() : ?bool {
         return $this->shiftBoolean();
     }
 
 
-    /** @deprecated */
+    /** @deprecated Preserve until 1.1.0 */
     public function shiftBoolEx() : bool {
         return $this->shiftBooleanEx();
     }

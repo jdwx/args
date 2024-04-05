@@ -129,6 +129,16 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    /**
+     * @noinspection PhpDeprecationInspection Preserve until 1.1.0.
+     */
+    public function testShiftBool() : void {
+        $args = new Arguments( [ 'true' ] );
+        self::assertTrue( $args->shiftBool() );
+        self::assertNull( $args->shiftBool() );
+    }
+
+
     public function testShiftBooleanForNoArg() : void {
         $args = new Arguments( [] );
         self::assertNull( $args->shiftBoolean() );
