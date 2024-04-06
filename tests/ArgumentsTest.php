@@ -298,10 +298,11 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftInteger() : void {
-        $args = new Arguments( [ '123', '456', '78.9' ] );
-        self::assertEquals( 123, $args->shiftInteger() );
-        self::assertEquals( 456, $args->shiftInteger() );
-        self::assertEquals( 78, $args->shiftInteger() );
+        $args = new Arguments( [ '123', '456', '78.9', '0' ] );
+        self::assertSame( 123, $args->shiftInteger() );
+        self::assertSame( 456, $args->shiftInteger() );
+        self::assertSame( 78, $args->shiftInteger() );
+        self::assertSame( 0, $args->shiftInteger() );
         self::assertNull( $args->shiftInteger() );
     }
 
