@@ -20,6 +20,17 @@ class ParsedSegmentTest extends TestCase {
     }
 
 
+    public function testSubstBackQuotes() : void {
+        $x = new ParsedSegment( Segment::UNQUOTED, "foo" );
+        $x->substBackQuotes( function( $i_st ) { return $i_st; } );
+        self::assertSame( "foo", $x->getProcessed() );
+
+        $x = new ParsedSegment( Segment::BACK_QUOTED, "foo" );
+        $x->substBackQuotes( function() { return "bar"; } );
+        self::assertSame( "bar", $x->getProcessed() );
+    }
+
+
     public function testSubstVariablesForBraces() : void {
         $rVariables = [ 'bar' => 'qux' ];
 

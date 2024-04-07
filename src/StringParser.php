@@ -40,9 +40,9 @@ class StringParser {
     /**
      * Parse a string into one or more arguments
      */
-    public static function parseString( string $i_stLine, string $i_class = ParsedString::class ) : ParsedString|string {
+    public static function parseString( string $i_stLine ) : ParsedString|string {
         $st = trim( preg_replace( "/\s\s+/", " ", $i_stLine ) );
-        $pln = new $i_class();
+        $pln = new ParsedString();
         assert( $pln instanceof ParsedString );
         while ( $st !== "" ) {
             $iSpan = strcspn( $st, " \\\"'#`" );

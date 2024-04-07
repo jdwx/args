@@ -53,6 +53,14 @@ class ParsedSegment {
     }
 
 
+    public function substBackQuotes( callable $i_fnCallback ) : void {
+        if ( Segment::BACK_QUOTED !== $this->type ) {
+            return;
+        }
+        $this->textProcessed = $i_fnCallback( $this->textProcessed );
+    }
+
+
     public static function substEscapeSequences( string $st ) : string {
 
         # Handle special character escape sequences.

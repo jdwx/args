@@ -135,6 +135,13 @@ class ParsedString implements Countable {
     }
 
 
+    public function substBackQuotes( callable $i_fnCallback ) : void {
+        foreach ( $this->rSegments as $seg ) {
+            $seg->substBackQuotes( $i_fnCallback );
+        }
+    }
+
+
     /**
      * If this method returns an error, the underlying segments are in an
      * inconsistent state and should not be used.

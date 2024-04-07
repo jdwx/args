@@ -45,6 +45,17 @@ class ParsedStringTest extends TestCase {
     }
 
 
+    public function testSubstBackQuotes() : void {
+        $x = StringParser::parseString( "baz foo qux" );
+        $x->substBackQuotes( function( $i_st ) { return $i_st; } );
+        self::assertSame( "baz foo qux", $x->getProcessed() );
+
+        $x = StringParser::parseString( "baz `foo` qux" );
+        $x->substBackQuotes( function() { return "bar"; } );
+        self::assertSame( "baz bar qux", $x->getProcessed() );
+    }
+
+
     public function testSubstVariables() : void {
         $x = StringParser::parseString( "foo \$bar baz" );
         self::assertTrue( $x->substVariables( [ "bar" => "bar" ] ) );
