@@ -14,7 +14,7 @@ class ParsedString implements Countable {
 
 
     /** @var ParsedSegment[] */
-    private array $rSegments = [];
+    protected array $rSegments = [];
 
 
     public function addBackQuoted( string $i_st ) : void {
