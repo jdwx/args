@@ -1,0 +1,56 @@
+<?php
+
+
+declare( strict_types = 1 );
+
+
+use JDWX\Args\StringParser;
+use PHPUnit\Framework\TestCase;
+
+
+class ParsedStringTest extends TestCase {
+
+
+    public function testGetArguments() : void {
+        $x = StringParser::parseString( "foo 1 baz" );
+        $args = $x->getArguments();
+        self::assertCount( 3, $args );
+        self::assertSame( "foo", $args->shiftString() );
+        self::assertSame( 1, $args->shiftInteger() );
+        self::assertSame( "baz", $args->shiftString() );
+    }
+
+
+    public function testGetOriginal() : void {
+        $x = StringParser::parseString( "foo bar baz" );
+        self::assertEquals( "foo bar baz", $x->getOriginal() );
+        self::assertEquals( "bar baz", $x->getOriginal( 1 ) );
+    }
+
+
+    public function testGetSegments() : void {
+        $x = StringParser::parseString( "foo bar baz" );
+        $r = $x->getSegments();
+        self::assertEquals( "foo", $r[ 0 ] );
+        self::assertEquals( "bar", $r[ 1 ] );
+        self::assertEquals( "baz", $r[ 2 ] );
+        self::assertCount( 3, $r );
+    }
+
+
+    public function testSubstVariables() : void {
+        $x = StringParser::parseString( "foo \$bar baz" );
+        self::assertTrue( $x->substVariables( [ "bar" => "bar" ] ) );
+        self::assertEquals( "foo bar baz", $x->getProcessed() );
+    }
+
+
+    public function testSubstVariablesForUndefinedVariable() : void {
+        $x = StringParser::parseString( "foo \$bar baz" );
+        $y = $x->substVariables( [] );
+        self::assertIsString( $y );
+        self::assertStringContainsString( "Undefined", $y );
+    }
+
+
+}
