@@ -11,6 +11,13 @@ use PHPUnit\Framework\TestCase;
 class ParsedStringTest extends TestCase {
 
 
+    public function testCount() : void {
+        $x = StringParser::parseString( "foo bar baz" );
+        self::assertCount( 5, $x );
+        self::assertSame( 5, $x->count() );
+    }
+
+
     public function testGetArguments() : void {
         $x = StringParser::parseString( "foo 1 baz" );
         $args = $x->getArguments();

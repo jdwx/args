@@ -64,6 +64,7 @@ class StringParserTest extends TestCase {
 
 
     public function testParseLineForBackslashNewline() : void {
+        /** @noinspection SpellCheckingInspection */
         $x = StringParser::parseString( "foo\\nbar" );
         self::assertInstanceOf( ParsedString::class, $x );
         self::assertCount( 3, $x );

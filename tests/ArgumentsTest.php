@@ -131,6 +131,7 @@ class ArgumentsTest extends TestCase {
 
     /**
      * @noinspection PhpDeprecationInspection Preserve until 1.1.0.
+     * @suppress PhanDeprecatedFunction
      */
     public function testShiftBool() : void {
         $args = new Arguments( [ 'true' ] );
@@ -141,6 +142,7 @@ class ArgumentsTest extends TestCase {
 
     /**
      * @noinspection PhpDeprecationInspection Preserve until 1.1.0.
+     * @suppress PhanDeprecatedFunction
      */
     public function testShiftBoolEx() : void {
         $args = new Arguments( [ 'true' ] );
@@ -342,8 +344,10 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftIPAddress() : void {
+        /** @noinspection SpellCheckingInspection */
         $args = new Arguments( [ '1.2.3.4', '1234:5678:90ab:cdef::1' ] );
         self::assertEquals( '1.2.3.4', $args->shiftIPAddress() );
+        /** @noinspection SpellCheckingInspection */
         self::assertEquals( '1234:5678:90ab:cdef::1', $args->shiftIPAddress() );
         self::assertNull( $args->shiftIPAddress() );
     }
@@ -379,6 +383,7 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftIPv4AddressForIPv6Address() : void {
+        /** @noinspection SpellCheckingInspection */
         $args = new Arguments( [ '1234:5678:90ab:cdef::1' ] );
         self::expectException( BadArgumentException::class );
         $args->shiftIPv4Address();
@@ -394,7 +399,9 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftIPv6Address() : void {
+        /** @noinspection SpellCheckingInspection */
         $args = new Arguments( [ '1234:5678:90ab:cdef::1' ] );
+        /** @noinspection SpellCheckingInspection */
         self::assertEquals( '1234:5678:90ab:cdef::1', $args->shiftIPv6Address() );
         self::assertNull( $args->shiftIPv6Address() );
     }
@@ -415,7 +422,9 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftIPv6AddressEx() : void {
+        /** @noinspection SpellCheckingInspection */
         $args = new Arguments( [ '1234:5678:90ab:cdef::1' ] );
+        /** @noinspection SpellCheckingInspection */
         self::assertEquals( '1234:5678:90ab:cdef::1', $args->shiftIPv6AddressEx() );
         self::expectException( MissingArgumentException::class );
         $args->shiftIPv6AddressEx();
