@@ -23,6 +23,15 @@ class ParsedSegment {
     }
 
 
+    public function debug() : array {
+        return [
+            "type" => $this->type,
+            "textOriginal" => $this->getOriginal(),
+            "textProcessed" => $this->getProcessed(),
+        ];
+    }
+
+
     public function getOriginal( bool $i_bIncludeComments = false ) : string {
         return match ( $this->type ) {
             Segment::DELIMITER, Segment::UNQUOTED => $this->textOriginal,

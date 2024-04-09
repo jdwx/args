@@ -52,6 +52,15 @@ class ParsedString implements Countable {
     }
 
 
+    public function debug() : array {
+        $rOut = [];
+        foreach ( $this->rSegments as $seg ) {
+            $rOut[] = $seg->debug();
+        }
+        return $rOut;
+    }
+
+
     public function getArguments() : Arguments {
         return new Arguments( $this->getSegments() );
     }

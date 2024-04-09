@@ -4,6 +4,7 @@
 declare( strict_types = 1 );
 
 
+use JDWX\Args\Segment;
 use JDWX\Args\StringParser;
 use PHPUnit\Framework\TestCase;
 
@@ -15,6 +16,25 @@ class ParsedStringTest extends TestCase {
         $x = StringParser::parseString( "foo bar baz" );
         self::assertCount( 5, $x );
         self::assertSame( 5, $x->count() );
+    }
+
+
+    public function testDebug() : void {
+        $x = StringParser::parseString( "foo \"bar\" \$baz" );
+        $x->substVariables( [ "baz" => "qux" ]);
+        $r = $x->debug();
+        self::assertCount( 5, $r );
+        self::assertSame( Segment::UNQUOTED, $r[ 0 ][ 'type' ] );
+        self::assertSame( Segment::DELIMITER, $r[ 1 ][ 'type' ] );
+        self::assertSame( Segment::DOUBLE_QUOTED, $r[ 2 ][ 'type' ] );
+        self::assertSame( Segment::DELIMITER, $r[ 3 ][ 'type' ] );
+        self::assertSame( Segment::UNQUOTED, $r[ 4 ][ 'type' ] );
+        self::assertSame( "foo", $r[ 0 ][ 'textOriginal' ] );
+        self::assertSame( "foo", $r[ 0 ]['textProcessed' ] );
+        self::assertSame( "\"bar\"", $r[ 2 ][ 'textOriginal' ] );
+        self::assertSame( "bar", $r[ 2 ][ 'textProcessed' ] );
+        self::assertSame( "\$baz", $r[ 4 ][ 'textOriginal' ] );
+        self::assertSame( "qux", $r[ 4 ][ 'textProcessed' ] );
     }
 
 

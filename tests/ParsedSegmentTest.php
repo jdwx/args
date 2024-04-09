@@ -12,6 +12,16 @@ use PHPUnit\Framework\TestCase;
 class ParsedSegmentTest extends TestCase {
 
 
+    public function testDebug() : void {
+        $x = new ParsedSegment( Segment::UNQUOTED, "foo" );
+        $r = $x->debug();
+        self::assertCount( 3, $r );
+        self::assertSame( Segment::UNQUOTED, $r[ 'type' ] );
+        self::assertSame( 'foo', $r[ 'textOriginal' ] );
+        self::assertSame( 'foo', $r[ 'textProcessed' ] );
+    }
+
+
     public function testIsComment() : void {
         $x = new ParsedSegment( Segment::UNQUOTED, "foo" );
         self::assertFalse( $x->isComment() );
