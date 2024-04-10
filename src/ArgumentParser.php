@@ -11,14 +11,18 @@ class ArgumentParser {
 
 
     public static function parseBool( string $i_st ) : bool {
-        switch ( strtolower( $i_st ) ) {
+        switch ( trim( strtolower( $i_st ) ) ) {
             case 'true':
             case 'yes':
+            case 'yeah':
+            case 'y':
             case 'on':
             case '1':
                 return true;
             case 'false':
             case 'no':
+            case 'nope':
+            case 'n':
             case 'off':
             case '0':
                 return false;
