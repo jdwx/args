@@ -104,6 +104,18 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    /**
+     * @param array $i_rstOptions The valid options and their default values.
+     * @return array The options that were defined and associated values
+     *               given.
+     *
+     * Takes an array of options and their default values. E.g.,
+     * [ 'happy' => true, 'value' => 42 ]. The default value is used
+     * if the option is specified by itself. E.g., "--value" returns
+     * [ 'value' => 42 ], but "--value=99" returns [ 'value' => 99 ].
+     * Returns an array with the options that were found as keys and
+     * the values provided or taken from the defaults as values.
+     */
     public function handleOptionsDefined( array $i_rstOptions ) : array {
         $rOptions = $this->handleOptions();
         foreach ( $rOptions as $stKey => $bstValue ) {
