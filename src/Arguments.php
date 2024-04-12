@@ -409,6 +409,7 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    /** @param string[] $i_rstKeywords The acceptable values for this parameter. */
     public function shiftKeyword( array $i_rstKeywords ) : ?string {
         $nst = $this->shiftString();
         if ( $nst === null ) {
@@ -418,6 +419,7 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    /** @param string[] $i_rstKeywords The acceptable values for this parameter. */
     public function shiftKeywordEx( array $i_rstKeywords ) : string {
         $nst = $this->shiftKeyword( $i_rstKeywords );
         if ( is_string( $nst ) ) {
@@ -428,6 +430,19 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    /**
+     * @param string[] $i_rMap An array of keywords and values.
+     * @return string|null The value associated with the keyword, or null if
+     *                     the keyword is missing.
+     *
+     * This is similar to shiftKeyword() but compares to the keys of $i_rMap
+     * instead of the values, and returns the value of the matching key.
+     * This is useful for accepting a bunch of variants of a keyword, e.g.:
+     * [
+     *   'yes' => 'yes', 'yeah' => 'yes', 'y' => 'yes',
+     *   'no' => 'no', 'nope' => 'no', 'n' => 'no'
+     * ]
+     */
     public function shiftMap( array $i_rMap ) : ?string {
         $nst = $this->shiftString();
         if ( $nst === null ) {
@@ -437,6 +452,18 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    /**
+     * @param string[] $i_rMap An array of keywords and values.
+     * @return string The value associated with the keyword.
+     *
+     * This is similar to shiftKeyword() but compares to the keys of $i_rMap
+     * instead of the values, and returns the value of the matching key.
+     * This is useful for accepting a bunch of variants of a keyword, e.g.:
+     * [
+     *   'yes' => 'yes', 'yeah' => 'yes', 'y' => 'yes',
+     *   'no' => 'no', 'nope' => 'no', 'n' => 'no'
+     * ]
+     */
     public function shiftMapEx( array $i_rMap ) : string {
         $nst = $this->shiftMap( $i_rMap );
         if ( is_string( $nst ) ) {
