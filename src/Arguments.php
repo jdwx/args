@@ -297,7 +297,7 @@ class Arguments extends ArgumentParser implements Countable {
      * and the maximum is exclusive).  This is because the interval [0, 1) is a
      * common use case.
      */
-    public function shiftFloat( float $i_fMin = PHP_FLOAT_MIN,
+    public function shiftFloat( float $i_fMin = -PHP_FLOAT_MAX,
                                 float $i_fMax = PHP_FLOAT_MAX ) : ?float {
         $nst = $this->shiftString();
         if ( $nst === null ) {
@@ -307,7 +307,7 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftFloatEx( float $i_fMin = PHP_FLOAT_MIN,
+    public function shiftFloatEx( float $i_fMin = -PHP_FLOAT_MAX,
                                   float $i_fMax = PHP_FLOAT_MAX ) : float {
         $nf = $this->shiftFloat( $i_fMin, $i_fMax );
         if ( is_float( $nf ) ) {
