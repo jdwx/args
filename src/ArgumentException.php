@@ -7,8 +7,8 @@ declare( strict_types = 1 );
 namespace JDWX\Args;
 
 
-use Exception;
+use RuntimeException;
 
-class ArgumentException extends Exception {
+class ArgumentException extends RuntimeException {
 }
 
