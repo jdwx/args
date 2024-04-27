@@ -50,6 +50,18 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
+     * Returns the remaining arguments processed as filename globs.
+     */
+    public function endWithGlob( bool $i_bAllowEmpty = false ) : array {
+        $rFiles = [];
+        while ( $rGlob = $this->shiftGlob( $i_bAllowEmpty ) ) {
+            $rFiles = array_merge( $rFiles, $rGlob );
+        }
+        return array_unique( $rFiles );
+    }
+
+
+    /**
      * Returns the remaining arguments, separated by spaces, as a single string.
      */
     public function endWithString() : string {
@@ -314,6 +326,39 @@ class Arguments extends ArgumentParser implements Countable {
             return $nf;
         }
         throw new MissingArgumentException( "Missing float argument" );
+    }
+
+
+    /**
+     * Expects a string argument that is a glob pattern. The glob is expanded
+     * and the resulting list of files is returned.
+     *
+     * @param bool $i_bAllowEmpty If true, an empty glob is allowed.
+     * @return array|null The list of files that match the glob, or null if
+     *                   no argument is available.
+     */
+    public function shiftGlob( bool $i_bAllowEmpty = false ) : ?array {
+        $nst = $this->shiftString();
+        if ( $nst === null ) {
+            return null;
+        }
+        return self::parseGlob( $nst, $i_bAllowEmpty );
+    }
+
+
+    /**
+     * Expects a string argument that is a glob pattern. The glob is expanded
+     * and the resulting list of files is returned.
+     *
+     * @param bool $i_bAllowEmpty If true, an empty glob is allowed.
+     * @return array The list of files that match the glob.
+     */
+    public function shiftGlobEx( bool $i_bAllowEmpty = false ) : array {
+        $nrFiles = $this->shiftGlob( $i_bAllowEmpty );
+        if ( is_array( $nrFiles ) ) {
+            return $nrFiles;
+        }
+        throw new MissingArgumentException( "Missing glob argument" );
     }
 
 

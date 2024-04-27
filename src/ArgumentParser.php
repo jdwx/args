@@ -76,6 +76,15 @@ class ArgumentParser {
     }
 
 
+    public static function parseGlob( string $i_st, bool $i_bAllowEmpty = false ) : array {
+        $r = glob( $i_st );
+        if ( false === $r || ( ! $i_bAllowEmpty && 0 === count( $r ) ) ) {
+            throw new BadArgumentException( $i_st, "Invalid glob pattern" );
+        }
+        return $r;
+    }
+
+
     public static function parseInteger( string $i_st, int $i_iMin, int $i_iMax ) : int {
         if ( ! is_numeric( $i_st ) ) {
             throw new BadArgumentException( $i_st, "Invalid integer" );

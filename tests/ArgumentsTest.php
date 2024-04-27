@@ -46,6 +46,20 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testEndsWithGlob() : void {
+        $args = new Arguments( [ __DIR__ . '/data/*.txt', __DIR__ . '/data/a.*' ] );
+        $r = $args->endWithGlob();
+        self::assertCount( 5, $r );
+        self::assertContains( __DIR__ . '/data/a.json', $r );
+        self::assertContains( __DIR__ . '/data/a.txt', $r );
+        self::assertContains( __DIR__ . '/data/a.yml', $r );
+        self::assertContains( __DIR__ . '/data/b.txt', $r );
+        self::assertContains( __DIR__ . '/data/c.txt', $r );
+        self::assertNotContains( __DIR__ . '/data/b.json', $r );
+        self::assertTrue( $args->empty() );
+    }
+
+
     public function testEndsWithString() : void {
         $args = new Arguments( [ 'Hello', 'world!' ] );
         self::assertEquals( 'Hello world!', $args->endWithString() );
@@ -284,6 +298,55 @@ class ArgumentsTest extends TestCase {
         self::assertEquals( 123.0, $args->shiftFloatEx() );
         self::expectException( MissingArgumentException::class );
         $args->shiftFloatEx();
+    }
+
+
+    public function testShiftGlob() : void {
+        $args = new Arguments( [ __DIR__ . '/data/*.txt' ] );
+        $r = $args->shiftGlob();
+        static::assertIsArray( $r );
+        assert( is_array( $r ) );
+        self::assertCount( 3, $r );
+        self::assertContains( __DIR__ . '/data/a.txt', $r );
+        self::assertContains( __DIR__ . '/data/b.txt', $r );
+        self::assertContains( __DIR__ . '/data/c.txt', $r );
+    }
+
+
+    public function testShiftGlobForNoArgs() : void {
+        $args = new Arguments( [] );
+        static::assertNull( $args->shiftGlob() );
+    }
+
+
+    public function testShiftGlobForNoMatch() : void {
+        $args = new Arguments( [ __DIR__ . '/data/*.foo' ] );
+        self::expectException( BadArgumentException::class );
+        $args->shiftGlob();
+    }
+
+
+    public function testShiftGlobForNoMatchIsOK() : void {
+        $args = new Arguments( [ __DIR__ . '/data/*.foo' ] );
+        $r = $args->shiftGlob( true );
+        static::assertEmpty( $r );
+    }
+
+
+    public function testShiftGlobEx() : void {
+        $args = new Arguments( [ __DIR__ . '/data/*.txt' ] );
+        $r = $args->shiftGlobEx();
+        self::assertCount( 3, $r );
+        self::assertContains( __DIR__ . '/data/a.txt', $r );
+        self::assertContains( __DIR__ . '/data/b.txt', $r );
+        self::assertContains( __DIR__ . '/data/c.txt', $r );
+    }
+
+
+    public function testShiftGlobExForNoArgs() : void {
+        $args = new Arguments( [] );
+        self::expectException( MissingArgumentException::class );
+        $args->shiftGlobEx();
     }
 
 
