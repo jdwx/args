@@ -62,6 +62,18 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
+     * Returns the remaining arguments processed as filename globs.
+     */
+    public function endWithGlobEx( bool $i_bAllowEmpty = false ) : array {
+        $rFiles = $this->endWithGlob( $i_bAllowEmpty );
+        if ( 0 != count( $rFiles ) ) {
+            return $rFiles;
+        }
+        throw new MissingArgumentException( "Missing glob argument" );
+    }
+
+
+    /**
      * Returns the remaining arguments, separated by spaces, as a single string.
      */
     public function endWithString() : string {

@@ -60,6 +60,32 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testEndsWithGlobEx() : void {
+        $args = new Arguments( [ __DIR__ . '/data/a.*' ] );
+        $r = $args->endWithGlobEx();
+        self::assertCount( 3, $r );
+        self::assertContains( __DIR__ . '/data/a.json', $r );
+        self::assertContains( __DIR__ . '/data/a.txt', $r );
+        self::assertContains( __DIR__ . '/data/a.yml', $r );
+        self::assertNotContains( __DIR__ . '/data/b.json', $r );
+        self::assertTrue( $args->empty() );
+    }
+
+
+    public function testEndsWithGlobExForNoArgs() : void {
+        $args = new Arguments( [] );
+        self::expectException( MissingArgumentException::class );
+        $args->endWithGlobEx();
+    }
+
+
+    public function testEndsWithGlobExForNoMatches() : void {
+        $args = new Arguments( [ __DIR__ . '/data/*.foo' ] );
+        self::expectException( BadArgumentException::class );
+        $args->endWithGlobEx();
+    }
+
+
     public function testEndsWithString() : void {
         $args = new Arguments( [ 'Hello', 'world!' ] );
         self::assertEquals( 'Hello world!', $args->endWithString() );
