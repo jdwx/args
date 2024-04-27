@@ -62,7 +62,10 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
-     * Returns the remaining arguments processed as filename globs.
+     * Returns the remaining arguments processed as filename globs. This
+     * method throws an exception if no arguments are available, which
+     * is useful when you want to ensure you have at least one matching
+     * filename.
      */
     public function endWithGlobEx( bool $i_bAllowEmpty = false ) : array {
         $rFiles = $this->endWithGlob( $i_bAllowEmpty );
