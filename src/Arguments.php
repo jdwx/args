@@ -79,8 +79,24 @@ class Arguments extends ArgumentParser implements Countable {
     /**
      * Returns the remaining arguments, separated by spaces, as a single string.
      */
-    public function endWithString() : string {
+    public function endWithString() : ?string {
+        if ( $this->empty() ) {
+            return null;
+        }
         return join( " ", $this->endWithArray() );
+    }
+
+
+    /**
+     * Returns the remaining arguments, separated by spaces, as a single string.
+     * Requires at least one argument to be present.
+     */
+    public function endWithStringEx( string $i_stMissing = "Missing argument" ) : string {
+        $nst = $this->endWithString();
+        if ( is_string( $nst ) ) {
+            return $nst;
+        }
+        throw new MissingArgumentException( $i_stMissing );
     }
 
 

@@ -90,6 +90,20 @@ class ArgumentsTest extends TestCase {
         $args = new Arguments( [ 'Hello', 'world!' ] );
         self::assertEquals( 'Hello world!', $args->endWithString() );
         self::assertTrue( $args->empty() );
+
+        $args = new Arguments( [] );
+        self::assertNull( $args->endWithString() );
+    }
+
+
+    public function testEndsWithStringEx() : void {
+        $args = new Arguments( [ 'Hello', 'world!' ] );
+        self::assertEquals( 'Hello world!', $args->endWithStringEx() );
+        self::assertTrue( $args->empty() );
+
+        $args = new Arguments( [] );
+        self::expectException( MissingArgumentException::class );
+        $args->endWithStringEx();
     }
 
 
