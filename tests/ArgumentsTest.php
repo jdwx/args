@@ -152,6 +152,7 @@ class ArgumentsTest extends TestCase {
         self::assertNull( $args->peekKeywords( $rKeywords ) );
         $args->shiftStringEx();
         self::assertNull( $args->peekKeywords( $rKeywords ) );
+        $args->end();
     }
 
 
@@ -165,6 +166,17 @@ class ArgumentsTest extends TestCase {
         self::assertNull( $args->peekString() );
         self::expectException( LogicException::class );
         $args->peekString( null, true );
+    }
+
+
+    public function testPeekStringExact() : void {
+        $args = new Arguments( [ 'foo', 'bar' ] );
+        self::assertTrue( $args->peekStringExact( 'foo', false ) );
+        self::assertTrue( $args->peekStringExact( 'foo' ) );
+        self::assertFalse( $args->peekStringExact( 'foo' ) );
+        self::assertTrue( $args->peekStringExact( 'bar' ) );
+        self::assertFalse( $args->peekStringExact( 'bar' ) );
+        $args->end();
     }
 
 

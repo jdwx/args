@@ -236,6 +236,36 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    /**
+     * @param string $i_stExpected The string that is expected to be the next
+     *                             argument.
+     * @param bool $i_bConsume If true, a matching argument is removed from
+     *                         the list.
+     * @return bool True if the next argument matches/matched the expected
+     *              string.
+     *
+     * This is used to check if the next argument is a specific string. If
+     * it is, the argument is (by default) removed from the list. If it is
+     * not, the list is unchanged.
+     *
+     * There are a number of legacy use cases where this is useful, but new
+     * code should use handleOptions() instead.
+     *
+     */
+    public function peekStringExact( string $i_stExpected, bool $i_bConsume = true ) : bool {
+        if ( $this->empty() ) {
+            return false;
+        }
+        if ( $this->args[ 0 ] !== $i_stExpected ) {
+            return false;
+        }
+        if ( $i_bConsume ) {
+            array_shift( $this->args );
+        }
+        return true;
+    }
+
+
     /** @deprecated Preserve until 1.1.0 */
     public function shiftBool() : ?bool {
         return $this->shiftBoolean();
