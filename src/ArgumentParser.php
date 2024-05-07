@@ -54,7 +54,8 @@ class ArgumentParser {
     }
 
 
-    public static function parseFloat( string $i_st, float $i_fMin, float $i_fMax ) : float {
+    public static function parseFloat( string $i_st, float $i_fMin = -PHP_FLOAT_MAX,
+                                       float $i_fMax = PHP_FLOAT_MAX ) : float {
         if ( ! is_numeric( $i_st ) ) {
             throw new BadArgumentException( $i_st, "Invalid floating-point number" );
         }
@@ -85,7 +86,7 @@ class ArgumentParser {
     }
 
 
-    public static function parseInteger( string $i_st, int $i_iMin, int $i_iMax ) : int {
+    public static function parseInteger( string $i_st, int $i_iMin = PHP_INT_MIN, int $i_iMax = PHP_INT_MAX ) : int {
         if ( ! is_numeric( $i_st ) ) {
             throw new BadArgumentException( $i_st, "Invalid integer" );
         }
