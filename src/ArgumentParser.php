@@ -39,6 +39,15 @@ class ArgumentParser {
     }
 
 
+    public static function parseExistingDirectory( string $i_st ) : string {
+        $st = self::parseExistingFilename( $i_st );
+        if ( ! is_dir( $st ) ) {
+            throw new BadArgumentException( $i_st, "Not a directory" );
+        }
+        return $st;
+    }
+
+
     public static function parseExistingFileBody( string $i_st, ?string & $o_stFilename ) : string {
         $st = self::parseExistingFilename( $i_st );
         $o_stFilename = $st;

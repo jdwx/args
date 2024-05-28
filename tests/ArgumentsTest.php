@@ -254,6 +254,48 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testShiftExistingDirectory() : void {
+        $args = new Arguments( [ __DIR__ . '/data' ] );
+        self::assertEquals( __DIR__ . '/data', $args->shiftExistingDirectory() );
+        self::assertTrue( $args->empty() );
+        self::assertNull( $args->shiftExistingDirectory() );
+
+        $args = new Arguments( [ __DIR__ . '/data/a.txt' ] );
+        static::expectException( BadArgumentException::class );
+        $args->shiftExistingDirectory();
+    }
+
+
+    public function testShiftExistingDirectoryForNoSuchPath() : void {
+        $args = new Arguments( [ '/no/such/directory/nonexistent' ] );
+        static::expectException( BadArgumentException::class );
+        $args->shiftExistingDirectory();
+    }
+
+
+    public function testShiftExistingDirectoryEx() : void {
+        $args = new Arguments( [ __DIR__ . '/data' ] );
+        self::assertEquals( __DIR__ . '/data', $args->shiftExistingDirectoryEx() );
+        self::assertTrue( $args->empty() );
+        static::expectException( MissingArgumentException::class );
+        $args->shiftExistingDirectoryEx();
+    }
+
+
+    public function testShiftExistingDirectoryExForFile() : void {
+        $args = new Arguments( [ __DIR__ . '/data/a.txt' ] );
+        self::expectException( BadArgumentException::class );
+        $args->shiftExistingDirectoryEx();
+    }
+
+
+    public function testShiftExistingDirectoryExForNoSuchPath() : void {
+        $args = new Arguments( [ '/no/such/directory/nonexistent' ] );
+        self::expectException( BadArgumentException::class );
+        $args->shiftExistingDirectoryEx();
+    }
+
+
     public function testShiftExistingFileBody() : void {
         $args = new Arguments( [ __FILE__ ] );
         self::assertEquals( file_get_contents( __FILE__ ), $args->shiftExistingFileBody( $st ) );

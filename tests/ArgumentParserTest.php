@@ -12,6 +12,21 @@ use PHPUnit\Framework\TestCase;
 class ArgumentParserTest extends TestCase {
 
 
+    public function testParseExistingDirectory() : void {
+        $r = ArgumentParser::parseExistingDirectory( __DIR__ . '/data' );
+        static::assertSame( __DIR__ . '/data', $r );
+
+        static::expectException( BadArgumentException::class );
+        ArgumentParser::parseExistingDirectory( __DIR__ . '/data/foo' );
+    }
+
+
+    public function testParseExistingDirectoryForFile() : void {
+        static::expectException( BadArgumentException::class );
+        ArgumentParser::parseExistingDirectory( __DIR__ . '/data/a.txt' );
+    }
+
+
     public function testParseGlob() : void {
         $r = ArgumentParser::parseGlob( __DIR__ . '/data/*.txt' );
         static::assertCount( 3, $r );

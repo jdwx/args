@@ -314,6 +314,24 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    public function shiftExistingDirectory() : ?string {
+        $nst = $this->shiftString();
+        if ( ! is_string( $nst ) ) {
+            return null;
+        }
+        return self::parseExistingDirectory( $nst );
+    }
+
+
+    public function shiftExistingDirectoryEx() : string {
+        $nst = $this->shiftExistingDirectory();
+        if ( is_string( $nst ) ) {
+            return $nst;
+        }
+        throw new MissingArgumentException( "Missing directory argument" );
+    }
+
+
     /**
      * Similar to shiftExistingFilename() but returns the contents
      * of the specified file instead of the filename. Optionally stores
