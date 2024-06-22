@@ -107,6 +107,23 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testFromString() : void {
+        $args = Arguments::fromString( 'Hello world!' );
+        self::assertEquals( 'Hello', $args->shiftString() );
+        self::assertEquals( 'world!', $args->shiftString() );
+        self::assertTrue( $args->empty() );
+    }
+
+
+    public function testFromStringForQuotedString() : void {
+        $args = Arguments::fromString( 'foo "Hello world!" bar' );
+        self::assertEquals( 'foo', $args->shiftString() );
+        self::assertEquals( 'Hello world!', $args->shiftString() );
+        self::assertEquals( 'bar', $args->shiftString() );
+        self::assertTrue( $args->empty() );
+    }
+
+
     public function testHandleOptions() : void {
         $args = new Arguments( [ '--foo=bar', '--baz', 'Hello', '--no-qux', '--', '--quux', 'world!' ] );
         $rOptions = $args->handleOptions();

@@ -677,4 +677,10 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    public static function fromString( string $i_st ) : static {
+        $parsed = StringParser::parseString( $i_st );
+        return new static( $parsed->getSegments() );
+    }
+
+
 }
