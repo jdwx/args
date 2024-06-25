@@ -287,12 +287,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftBooleanEx() : bool {
+    public function shiftBooleanEx( string $i_nstRequired = null ) : bool {
         $nb = $this->shiftBoolean();
         if ( is_bool( $nb ) ) {
             return $nb;
         }
-        throw new MissingArgumentException( "Missing boolean argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing boolean argument' );
     }
 
 
@@ -305,12 +305,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftEmailAddressEx() : string {
+    public function shiftEmailAddressEx( string $i_nstRequired = null ) : string {
         $nst = $this->shiftEmailAddress();
         if ( is_string( $nst ) ) {
             return $nst;
         }
-        throw new MissingArgumentException( "Missing email address argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing email address argument' );
     }
 
 
@@ -323,12 +323,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftExistingDirectoryEx() : string {
+    public function shiftExistingDirectoryEx( string $i_nstRequired = null ) : string {
         $nst = $this->shiftExistingDirectory();
         if ( is_string( $nst ) ) {
             return $nst;
         }
-        throw new MissingArgumentException( "Missing directory argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing existing directory argument' );
     }
 
 
@@ -352,8 +352,8 @@ class Arguments extends ArgumentParser implements Countable {
      * of the specified file instead of the filename. Optionally stores
      * the filename into the string argument, if one is given.
      */
-    public function shiftExistingFileBodyEx( ?string &$o_nstFilename = null ) : string {
-        $st = $this->shiftExistingFilenameEx();
+    public function shiftExistingFileBodyEx( ?string &$o_nstFilename = null, ?string $i_nstRequired = null ) : string {
+        $st = $this->shiftExistingFilenameEx( $i_nstRequired );
         $o_nstFilename = $st;
         return file_get_contents( $st );
     }
@@ -371,12 +371,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftExistingFilenameEx() : string {
+    public function shiftExistingFilenameEx( ?string $i_nstRequired = null ) : string {
         $nst = $this->shiftExistingFilename();
         if ( is_string( $nst ) ) {
             return $nst;
         }
-        throw new MissingArgumentException( "Missing filename argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing filename argument' );
     }
 
 
@@ -398,13 +398,14 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftFloatEx( float $i_fMin = -PHP_FLOAT_MAX,
-                                  float $i_fMax = PHP_FLOAT_MAX ) : float {
+    public function shiftFloatEx( float   $i_fMin = -PHP_FLOAT_MAX,
+                                  float   $i_fMax = PHP_FLOAT_MAX,
+                                  ?string $i_nstRequired = null ) : float {
         $nf = $this->shiftFloat( $i_fMin, $i_fMax );
         if ( is_float( $nf ) ) {
             return $nf;
         }
-        throw new MissingArgumentException( "Missing float argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing float argument' );
     }
 
 
@@ -432,12 +433,12 @@ class Arguments extends ArgumentParser implements Countable {
      * @param bool $i_bAllowEmpty If true, an empty glob is allowed.
      * @return array The list of files that match the glob.
      */
-    public function shiftGlobEx( bool $i_bAllowEmpty = false ) : array {
+    public function shiftGlobEx( bool $i_bAllowEmpty = false, ?string $i_nstRequired = null ) : array {
         $nrFiles = $this->shiftGlob( $i_bAllowEmpty );
         if ( is_array( $nrFiles ) ) {
             return $nrFiles;
         }
-        throw new MissingArgumentException( "Missing glob argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing glob argument' );
     }
 
 
@@ -450,12 +451,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftHostnameEx() : string {
+    public function shiftHostnameEx( ?string $i_nstRequired = null ) : string {
         $nst = $this->shiftHostname();
         if ( is_string( $nst ) ) {
             return $nst;
         }
-        throw new MissingArgumentException( "Missing hostname argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing hostname argument' );
     }
 
 
@@ -469,13 +470,14 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftIntegerEx( int $i_iMin = PHP_INT_MIN,
-                                    int $i_iMax = PHP_INT_MAX ) : int {
+    public function shiftIntegerEx( int     $i_iMin = PHP_INT_MIN,
+                                    int     $i_iMax = PHP_INT_MAX,
+                                    ?string $i_nstRequired = null ) : int {
         $ni = $this->shiftInteger( $i_iMin, $i_iMax );
         if ( is_int( $ni ) ) {
             return $ni;
         }
-        throw new MissingArgumentException( "Missing integer argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing integer argument' );
     }
 
 
@@ -488,12 +490,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftIPAddressEx() : string {
+    public function shiftIPAddressEx( ?string $i_nstRequired = null ) : string {
         $nst = $this->shiftIPAddress();
         if ( is_string( $nst ) ) {
             return $nst;
         }
-        throw new MissingArgumentException( "Missing IP address argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing IP address argument' );
     }
 
 
@@ -506,12 +508,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftIPv4AddressEx() : string {
+    public function shiftIPv4AddressEx( ?string $i_nstRequired = null ) : string {
         $nst = $this->shiftIPv4Address();
         if ( is_string( $nst ) ) {
             return $nst;
         }
-        throw new MissingArgumentException( "Missing IPv4 address argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing IPv4 address argument' );
     }
 
 
@@ -524,12 +526,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftIPv6AddressEx() : string {
+    public function shiftIPv6AddressEx( ?string $i_nstRequired = null ) : string {
         $nst = $this->shiftIPv6Address();
         if ( is_string( $nst ) ) {
             return $nst;
         }
-        throw new MissingArgumentException( "Missing IPv6 address argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing IPv6 address argument' );
     }
 
 
@@ -544,13 +546,13 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /** @param string[] $i_rstKeywords The acceptable values for this parameter. */
-    public function shiftKeywordEx( array $i_rstKeywords ) : string {
+    public function shiftKeywordEx( array $i_rstKeywords, ?string $i_nstRequired = null ) : string {
         $nst = $this->shiftKeyword( $i_rstKeywords );
         if ( is_string( $nst ) ) {
             return $nst;
         }
         $stKeywords = self::summarizeKeywords( $i_rstKeywords );
-        throw new MissingArgumentException( "Missing keyword ({$stKeywords}) argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? "Missing keyword ({$stKeywords}) argument" );
     }
 
 
@@ -588,13 +590,13 @@ class Arguments extends ArgumentParser implements Countable {
      *   'no' => 'no', 'nope' => 'no', 'n' => 'no'
      * ]
      */
-    public function shiftMapEx( array $i_rMap ) : string {
+    public function shiftMapEx( array $i_rMap, ?string $i_nstRequired = null ) : string {
         $nst = $this->shiftMap( $i_rMap );
         if ( is_string( $nst ) ) {
             return $nst;
         }
         $stKeywords = self::summarizeKeywords( array_keys( $i_rMap ) );
-        throw new MissingArgumentException( "Missing one of ({$stKeywords}) argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? "Missing one of ({$stKeywords}) argument" );
     }
 
 
@@ -615,12 +617,12 @@ class Arguments extends ArgumentParser implements Countable {
      * Expects an argument specifying a filename that does not currently exist,
      * but could be created. E.g., any referenced parent directories must exist.
      */
-    public function shiftNonexistentFilenameEx() : string {
+    public function shiftNonexistentFilenameEx( ?string $i_nstRequired = null ) : string {
         $nst = $this->shiftString();
         if ( is_string( $nst ) ) {
             return $nst;
         }
-        throw new MissingArgumentException( "Missing file argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing file argument' );
     }
 
 
@@ -633,12 +635,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftPositiveIntegerEx( int $i_iMax = PHP_INT_MAX ) : int {
+    public function shiftPositiveIntegerEx( int $i_iMax = PHP_INT_MAX, ?string $i_nstRequired = null ) : int {
         $ni = $this->shiftPositiveInteger( $i_iMax );
         if ( is_int( $ni ) ) {
             return $ni;
         }
-        throw new MissingArgumentException( "Missing positive integer argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing positive integer argument' );
     }
 
 
@@ -650,12 +652,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftStringEx() : string {
+    public function shiftStringEx( ?string $i_nstRequired = null ) : string {
         $nst = $this->shiftString();
         if ( is_string( $nst ) ) {
             return $nst;
         }
-        throw new MissingArgumentException( "Missing argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing argument' );
     }
 
 
@@ -668,12 +670,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftUnsignedIntegerEx( int $i_iMax = PHP_INT_MAX ) : int {
+    public function shiftUnsignedIntegerEx( int $i_iMax = PHP_INT_MAX, ?string $i_nstRequired = null ) : int {
         $ni = $this->shiftUnsignedInteger( $i_iMax );
         if ( is_int( $ni ) ) {
             return $ni;
         }
-        throw new MissingArgumentException( "Missing unsigned integer argument" );
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing unsigned integer argument' );
     }
 
 
