@@ -43,12 +43,22 @@ class ParsedSegment {
     }
 
 
-    public function getProcessed() : string {
-        return match ( $this->type ) {
+    public function getProcessed( bool $i_bIncludeQuotes = false ) : string {
+        $txt = match ( $this->type ) {
             Segment::DELIMITER, Segment::SINGLE_QUOTED, Segment::BACK_QUOTED => $this->textProcessed,
             Segment::UNQUOTED, Segment::DOUBLE_QUOTED => self::substEscapeSequences( $this->textProcessed ),
             Segment::COMMENT => "",
         };
+        if ( $i_bIncludeQuotes ) {
+            if ( Segment::SINGLE_QUOTED === $this->type ) {
+                $txt = "'" . $txt . "'";
+            } elseif ( Segment::DOUBLE_QUOTED === $this->type ) {
+                $txt = '"' . $txt . '"';
+            } elseif ( Segment::BACK_QUOTED === $this->type ) {
+                $txt = "`" . $txt . "`";
+            }
+        }
+        return $txt;
     }
 
 
