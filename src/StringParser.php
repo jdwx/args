@@ -11,41 +11,26 @@ class StringParser {
 
 
     /**
-     * @param string $i_st The string to parse for a quoted string, with the starting quote
-     *                     character already removed
-     * @param string $i_stQuoteCharacter The character ends the quoted string
-     * @return array|string Return a text error as a string or an array
-     *                      containing [ quoted-text, everything-after ]
-     */
-    protected static function parseQuote( string $i_st, string $i_stQuoteCharacter ) : array|string {
-        $stOut = "";
-        $stRest = $i_st;
-        while ( true ) {
-            $iSpan = strpos( $stRest, $i_stQuoteCharacter );
-            if ( false === $iSpan ) {
-                return "Unmatched {$i_stQuoteCharacter}.";
-            }
-            if ( $iSpan > 0 && substr( $stRest, $iSpan - 1, 1 ) === "\\" ) {
-                $stOut .= substr( $stRest, 0, $iSpan - 1 ) . $i_stQuoteCharacter;
-                $stRest = substr( $stRest, $iSpan + 1 );
-                continue;
-            }
-            $stOut .= substr( $stRest, 0, $iSpan );
-            $stRest = substr( $stRest, $iSpan + 1 );
-            return [ $stOut, $stRest ];
-        }
-    }
-
-
-    /**
      * Parse a string into one or more arguments
      */
-    public static function parseString( string $i_stLine ) : ParsedString|string {
+    public static function parseString( string $i_stLine, bool $i_bSingleQuotes = true,
+                                        bool   $i_bDoubleQuotes = true,
+                                        bool   $i_bBackquotes = true ) : ParsedString|string {
         $st = trim( preg_replace( "/\s\s+/", " ", $i_stLine ) );
         $pln = new ParsedString();
+        $stQuoteChars = ' \\#';
+        if ( $i_bDoubleQuotes ) {
+            $stQuoteChars .= '"';
+        }
+        if ( $i_bSingleQuotes ) {
+            $stQuoteChars .= "'";
+        }
+        if ( $i_bBackquotes ) {
+            $stQuoteChars .= '`';
+        }
         assert( $pln instanceof ParsedString );
         while ( $st !== "" ) {
-            $iSpan = strcspn( $st, " \\\"'#`" );
+            $iSpan = strcspn( $st, $stQuoteChars );
             $stUnquoted = substr( $st, 0, $iSpan );
             $pln->addUnquoted( $stUnquoted );
             $ch = substr( $st, $iSpan, 1 );
@@ -98,6 +83,33 @@ class StringParser {
             $st = $stRest;
         }
         return $pln;
+    }
+
+
+    /**
+     * @param string $i_st The string to parse for a quoted string, with the starting quote
+     *                     character already removed
+     * @param string $i_stQuoteCharacter The character ends the quoted string
+     * @return array|string Return a text error as a string or an array
+     *                      containing [ quoted-text, everything-after ]
+     */
+    protected static function parseQuote( string $i_st, string $i_stQuoteCharacter ) : array|string {
+        $stOut = "";
+        $stRest = $i_st;
+        while ( true ) {
+            $iSpan = strpos( $stRest, $i_stQuoteCharacter );
+            if ( false === $iSpan ) {
+                return "Unmatched {$i_stQuoteCharacter}.";
+            }
+            if ( $iSpan > 0 && substr( $stRest, $iSpan - 1, 1 ) === "\\" ) {
+                $stOut .= substr( $stRest, 0, $iSpan - 1 ) . $i_stQuoteCharacter;
+                $stRest = substr( $stRest, $iSpan + 1 );
+                continue;
+            }
+            $stOut .= substr( $stRest, 0, $iSpan );
+            $stRest = substr( $stRest, $iSpan + 1 );
+            return [ $stOut, $stRest ];
+        }
     }
 
 
