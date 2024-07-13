@@ -124,7 +124,7 @@ class ParsedString implements Countable {
      *
      * @return string[] An array of individual arguments.
      */
-    public function getSegments() : array {
+    public function getSegments( bool $i_bIncludeQuotes = false ) : array {
         $st = "";
         $rOut = [];
         foreach ( $this->rSegments as $seg ) {
@@ -135,7 +135,7 @@ class ParsedString implements Countable {
                 }
                 continue;
             }
-            $st .= $seg->getProcessed();
+            $st .= $seg->getProcessed( $i_bIncludeQuotes );
         }
         if ( $st !== "" ) {
             $rOut[] = $st;

@@ -30,6 +30,32 @@ class ParsedSegmentTest extends TestCase {
     }
 
 
+    public function testGetProcessed() : void {
+        $x = new ParsedSegment( Segment::UNQUOTED, "foo" );
+        self::assertSame( "foo", $x->getProcessed() );
+        $x = new ParsedSegment( Segment::SINGLE_QUOTED, "foo" );
+        self::assertSame( "foo", $x->getProcessed() );
+        $x = new ParsedSegment( Segment::DOUBLE_QUOTED, "foo" );
+        self::assertSame( "foo", $x->getProcessed() );
+        $x = new ParsedSegment( Segment::BACK_QUOTED, "foo" );
+        self::assertSame( "foo", $x->getProcessed() );
+        $x = new ParsedSegment( Segment::COMMENT, "foo" );
+        self::assertSame( "", $x->getProcessed() );
+
+        $x = new ParsedSegment( Segment::UNQUOTED, "foo" );
+        self::assertSame( "foo", $x->getProcessed( true ) );
+        $x = new ParsedSegment( Segment::SINGLE_QUOTED, "foo" );
+        self::assertSame( "'foo'", $x->getProcessed( true ) );
+        $x = new ParsedSegment( Segment::DOUBLE_QUOTED, "foo" );
+        self::assertSame( '"foo"', $x->getProcessed( true ) );
+        $x = new ParsedSegment( Segment::BACK_QUOTED, "foo" );
+        self::assertSame( "`foo`", $x->getProcessed( true ) );
+        $x = new ParsedSegment( Segment::COMMENT, "foo" );
+        self::assertSame( "", $x->getProcessed( true ) );
+
+    }
+
+
     public function testSubstBackQuotes() : void {
         $x = new ParsedSegment( Segment::UNQUOTED, "foo" );
         $x->substBackQuotes( function( $i_st ) { return $i_st; } );
