@@ -37,7 +37,7 @@ class ParsedString implements Countable {
     }
 
 
-    public function addSpace( $i_ch = " " ) : void {
+    public function addSpace( string $i_ch = " " ) : void {
         $this->addSegment( Segment::DELIMITER, $i_ch );
     }
 
@@ -52,6 +52,7 @@ class ParsedString implements Countable {
     }
 
 
+    /** @return list<array<string, string|Segment>> */
     public function debug() : array {
         $rOut = [];
         foreach ( $this->rSegments as $seg ) {
@@ -155,6 +156,7 @@ class ParsedString implements Countable {
      * If this method returns an error, the underlying segments are in an
      * inconsistent state and should not be used.
      *
+     * @param array<string,string> $i_rVariables An associative array of variable names and values.
      * @return true|string True if successful, otherwise an error message.
      */
     public function substVariables( array $i_rVariables ) : true|string {

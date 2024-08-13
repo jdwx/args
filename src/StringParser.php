@@ -90,7 +90,7 @@ class StringParser {
      * @param string $i_st The string to parse for a quoted string, with the starting quote
      *                     character already removed
      * @param string $i_stQuoteCharacter The character ends the quoted string
-     * @return array|string Return a text error as a string or an array
+     * @return list<string>|string Return a text error as a string or an array
      *                      containing [ quoted-text, everything-after ]
      */
     protected static function parseQuote( string $i_st, string $i_stQuoteCharacter ) : array|string {

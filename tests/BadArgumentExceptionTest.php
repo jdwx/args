@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 class BadArgumentExceptionTest extends TestCase {
 
 
-    public function testBadArgumentException() {
+    public function testBadArgumentException() : void {
         $ex = new JDWX\Args\BadArgumentException( "value", "message" );
         self::assertEquals( "value", $ex->getValue() );
         self::assertEquals( "message", $ex->getMessage() );

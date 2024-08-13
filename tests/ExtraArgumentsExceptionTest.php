@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 class ExtraArgumentsExceptionTest extends TestCase {
 
 
-    public function testExtraArgumentsException() {
+    public function testExtraArgumentsException() : void {
         $ex = new JDWX\Args\ExtraArgumentsException( [ "foo", "bar" ], "message" );
         $r = $ex->getArguments();
         self::assertEquals( "foo", $r[ 0 ] );

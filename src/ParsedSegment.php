@@ -13,6 +13,7 @@ class ParsedSegment {
     protected Segment $type;
 
     protected string $textProcessed;
+
     protected string $textOriginal;
 
 
@@ -23,6 +24,36 @@ class ParsedSegment {
     }
 
 
+    public static function substEscapeSequences( string $st ) : string {
+
+        # Handle special character escape sequences.
+        $st = str_replace( "\\n", "\n", $st );
+        $st = str_replace( "\\r", "\r", $st );
+        $st = str_replace( "\\t", "\t", $st );
+        $st = str_replace( "\\v", "\v", $st );
+        $st = str_replace( "\\e", "\e", $st );
+        $st = str_replace( "\\f", "\f", $st );
+        $st = str_replace( "\\a", "\a", $st );
+        $st = str_replace( "\\b", "\b", $st );
+        $st = str_replace( "\\0", "\0", $st );
+
+        # Handle octal escape sequences.
+        $st = preg_replace_callback( '/\\\\([0-7]{1,3})/', function ( $matches ) {
+            return chr( octdec( $matches[ 1 ] ) );
+        }, $st );
+
+        # Handle Unicode escape sequences like "\u00C3" => "Ã".
+        $st = preg_replace_callback( '/\\\\[uU]([0-9a-fA-F]{4})/', function ( $matches ) {
+            return mb_convert_encoding( pack( 'H*', $matches[ 1 ] ), 'UTF-8', 'UCS-2BE' );
+        }, $st );
+
+        # Anything else, just remove the backslash as if unquoted.
+        return preg_replace( '/\\\\(.)/', '$1', $st );
+
+    }
+
+
+    /** @return array<string, string|Segment> */
     public function debug() : array {
         return [
             "type" => $this->type,
@@ -80,35 +111,7 @@ class ParsedSegment {
     }
 
 
-    public static function substEscapeSequences( string $st ) : string {
-
-        # Handle special character escape sequences.
-        $st = str_replace( "\\n", "\n", $st );
-        $st = str_replace( "\\r", "\r", $st );
-        $st = str_replace( "\\t", "\t", $st );
-        $st = str_replace( "\\v", "\v", $st );
-        $st = str_replace( "\\e", "\e", $st );
-        $st = str_replace( "\\f", "\f", $st );
-        $st = str_replace( "\\a", "\a", $st );
-        $st = str_replace( "\\b", "\b", $st );
-        $st = str_replace( "\\0", "\0", $st );
-
-        # Handle octal escape sequences.
-        $st = preg_replace_callback( '/\\\\([0-7]{1,3})/', function ( $matches ) {
-            return chr( octdec( $matches[ 1 ] ) );
-        }, $st );
-
-        # Handle Unicode escape sequences like "\u00C3" => "Ã".
-        $st = preg_replace_callback( '/\\\\[uU]([0-9a-fA-F]{4})/', function ( $matches ) {
-            return mb_convert_encoding( pack( 'H*', $matches[ 1 ] ), 'UTF-8', 'UCS-2BE' );
-        }, $st );
-
-        # Anything else, just remove the backslash as if unquoted.
-        return preg_replace( '/\\\\(.)/', '$1', $st );
-
-    }
-
-
+    /** @param array<string, string> $i_rVariables */
     public function substVariables( array $i_rVariables ) : true|string {
         if ( Segment::SINGLE_QUOTED === $this->type ) {
             return true;
@@ -121,12 +124,18 @@ class ParsedSegment {
     }
 
 
+    /**
+     * @param array<string, string> $i_rVariables
+     * phpStan really struggles with the callback changing the type of $bst in this method.
+     * @phpstan-ignore return.unusedType
+     */
     private function substVariablesBare( array $i_rVariables ) : true|string {
         $bst = true;
         $st = preg_replace_callback( '/\$([a-zA-Z_][a-zA-Z0-9_]*)/', function ( $matches ) use ( &$i_rVariables, &$bst ) {
             if ( true !== $bst ) {
                 return "";
             }
+            /** @phpstan-ignore deadCode.unreachable */
             $stVar = $matches[ 1 ];
             $uMaxMatch = 0;
             $stSubst = "";
@@ -143,17 +152,24 @@ class ParsedSegment {
             if ( $uMaxMatch > 0 ) {
                 return $stSubst . substr( $stVar, $uMaxMatch );
             }
-            $bst = "Undefined variable: $stVar";
+            $bst = "Undefined variable: {$stVar}";
             return $stVar;
         }, $this->textProcessed );
         if ( $bst !== true ) {
             return $bst;
         }
+        /** @phpstan-ignore deadCode.unreachable */
         $this->textProcessed = $st;
         return true;
     }
 
 
+    /**
+     * @param array<string, string> $i_rVariables
+     *
+     * phpStan really struggles with the callback changing the type of $bst in this method.
+     * @phpstan-ignore return.unusedType
+     */
     private function substVariablesWithBraces( array $i_rVariables ) : true|string {
         $bst = true;
         $st = preg_replace_callback( '/\$\{([a-zA-Z_][a-zA-Z0-9_]*)}/', function ( $matches ) use ( &$i_rVariables, &$bst ) {
@@ -161,6 +177,7 @@ class ParsedSegment {
             if ( array_key_exists( $stVar, $i_rVariables ) ) {
                 return $i_rVariables[ $stVar ];
             }
+            /** @phpstan-ignore identical.alwaysFalse */
             if ( true === $bst ) {
                 $bst = "Undefined variable: $stVar";
             }
@@ -171,6 +188,7 @@ class ParsedSegment {
             return $bst;
         }
 
+        /** @phpstan-ignore deadCode.unreachable */
         $matches = [];
         preg_match( '/\$\{([a-zA-Z_][a-zA-Z0-9_]*)/', $st, $matches );
         if ( count( $matches ) > 0 ) {
