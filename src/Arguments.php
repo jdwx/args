@@ -8,13 +8,21 @@ namespace JDWX\Args;
 
 
 use Countable;
+use JDWX\Param\Parse;
 use LogicException;
 
 
 class Arguments extends ArgumentParser implements Countable {
 
 
-    public function __construct( protected array $args ) {
+    /** @param list<string> $args */
+    public function __construct( protected array $args ) {}
+
+
+    public static function fromString( string $i_st ) : static {
+        $parsed = StringParser::parseString( $i_st );
+        /** @phpstan-ignore new.static */
+        return new static( $parsed->getSegments() );
     }
 
 
@@ -40,6 +48,8 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
+     * @return list<string> The remaining unprocessed arguments.
+     *
      * Returns the remaining unprocessed arguments as an array.
      */
     public function endWithArray() : array {
@@ -50,18 +60,22 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
-     * Returns the remaining arguments processed as filename globs.
+     * @return list<string> A list of matching filenames
+     * Returns the remaining arguments processed as filename globs with duplicates
+     * removed.
      */
     public function endWithGlob( bool $i_bAllowEmpty = false ) : array {
         $rFiles = [];
         while ( $rGlob = $this->shiftGlob( $i_bAllowEmpty ) ) {
             $rFiles = array_merge( $rFiles, $rGlob );
         }
-        return array_unique( $rFiles );
+        return array_values( array_unique( $rFiles ) );
     }
 
 
     /**
+     * @return list<string> A list of matching filenames
+     *
      * Returns the remaining arguments processed as filename globs. This
      * method throws an exception if no arguments are available, which
      * is useful when you want to ensure you have at least one matching
@@ -101,6 +115,9 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
+     *
+     * @return array<string, mixed> The options that were present with their associated values.
+     *
      * Handles options in the form of --key=value or --key. These are extracted
      * out of the argument list and returned as an associative array. The
      * remaining arguments are preserved. The special argument "--" can be used
@@ -148,9 +165,32 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
-     * @param array $i_rstOptions The valid options and their default values.
-     * @return array The options that were defined and associated values
-     *               given.
+     * @param list<string> $i_rstOptions List of valid options.
+     * @return array<string, mixed> The options that were defined and
+     *                              associated values given.
+     *
+     * Like handleOptions() but enforces a predefined list of options.
+     */
+    public function handleOptionsAllowed( array $i_rstOptions ) : array {
+        $rOptions = $this->handleOptions();
+        foreach ( $rOptions as $stKey => $bstValue ) {
+            if ( in_array( $stKey, $i_rstOptions ) ) {
+                continue;
+            }
+            if ( is_bool( $bstValue ) ) {
+                throw new BadArgumentException( $bstValue ? "true" : "false", "Unknown option \"{$stKey}\"" );
+            }
+            throw new BadArgumentException( $bstValue, "Unknown option \"{$stKey}\"" );
+        }
+        return $rOptions;
+    }
+
+
+    /**
+     * @param array<string, mixed> $i_rstOptions The valid options and their
+     *                                           default values.
+     * @return array<string, mixed> The options that were defined and
+     *                              associated values given.
      *
      * Takes an array of options and their default values. E.g.,
      * [ 'happy' => true, 'value' => 42 ]. The default value is used
@@ -160,20 +200,21 @@ class Arguments extends ArgumentParser implements Countable {
      * the values provided or taken from the defaults as values.
      */
     public function handleOptionsDefined( array $i_rstOptions ) : array {
-        $rOptions = $this->handleOptions();
-        foreach ( $rOptions as $stKey => $bstValue ) {
-            if ( ! in_array( $stKey, $i_rstOptions ) ) {
-                if ( is_bool( $bstValue ) ) {
-                    throw new BadArgumentException( $bstValue ? "true" : "false", "Unknown option \"{$stKey}\"" );
-                }
-                throw new BadArgumentException( $bstValue, "Unknown option \"{$stKey}\"" );
+        $rOptions = $this->handleOptionsAllowed( array_keys( $i_rstOptions ) );
+        foreach ( $i_rstOptions as $stKey => $stValue ) {
+            if ( array_key_exists( $stKey, $rOptions ) && $rOptions[ $stKey ] !== true ) {
+                $i_rstOptions[ $stKey ] = $rOptions[ $stKey ];
             }
         }
-        return $rOptions;
+        return $i_rstOptions;
     }
 
 
     /**
+     *
+     * @param list<string> $i_rKeywords The keywords to look for.
+     * @param bool $i_bConsume If true, a matched keyword is removed from the argument list.
+     *
      * This is similar to shiftKeywords() but does not treat a mismatch as an error,
      * instead returning null. Unlike peekString(), this method returns the whole match
      * so you can tell which keyword matched.
@@ -266,24 +307,12 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    /** @deprecated Preserve until 1.1.0 */
-    public function shiftBool() : ?bool {
-        return $this->shiftBoolean();
-    }
-
-
-    /** @deprecated Preserve until 1.1.0 */
-    public function shiftBoolEx() : bool {
-        return $this->shiftBooleanEx();
-    }
-
-
     public function shiftBoolean() : ?bool {
         $nst = $this->shiftString();
         if ( $nst === null ) {
             return null;
         }
-        return self::parseBool( $nst );
+        return self::parseBoolean( $nst );
     }
 
 
@@ -414,7 +443,7 @@ class Arguments extends ArgumentParser implements Countable {
      * and the resulting list of files is returned.
      *
      * @param bool $i_bAllowEmpty If true, an empty glob is allowed.
-     * @return array|null The list of files that match the glob, or null if
+     * @return list<string>|null The list of files that match the glob, or null if
      *                   no argument is available.
      */
     public function shiftGlob( bool $i_bAllowEmpty = false ) : ?array {
@@ -431,7 +460,7 @@ class Arguments extends ArgumentParser implements Countable {
      * and the resulting list of files is returned.
      *
      * @param bool $i_bAllowEmpty If true, an empty glob is allowed.
-     * @return array The list of files that match the glob.
+     * @return list<string> The list of files that match the glob.
      */
     public function shiftGlobEx( bool $i_bAllowEmpty = false, ?string $i_nstRequired = null ) : array {
         $nrFiles = $this->shiftGlob( $i_bAllowEmpty );
@@ -457,27 +486,6 @@ class Arguments extends ArgumentParser implements Countable {
             return $nst;
         }
         throw new MissingArgumentException( $i_nstRequired ?? 'Missing hostname argument' );
-    }
-
-
-    public function shiftInteger( int $i_iMin = PHP_INT_MIN,
-                                  int $i_iMax = PHP_INT_MAX ) : ?int {
-        $nst = $this->shiftString();
-        if ( $nst === null ) {
-            return null;
-        }
-        return self::parseInteger( $nst, $i_iMin, $i_iMax );
-    }
-
-
-    public function shiftIntegerEx( int     $i_iMin = PHP_INT_MIN,
-                                    int     $i_iMax = PHP_INT_MAX,
-                                    ?string $i_nstRequired = null ) : int {
-        $ni = $this->shiftInteger( $i_iMin, $i_iMax );
-        if ( is_int( $ni ) ) {
-            return $ni;
-        }
-        throw new MissingArgumentException( $i_nstRequired ?? 'Missing integer argument' );
     }
 
 
@@ -535,6 +543,27 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    public function shiftInteger( int $i_iMin = PHP_INT_MIN,
+                                  int $i_iMax = PHP_INT_MAX ) : ?int {
+        $nst = $this->shiftString();
+        if ( $nst === null ) {
+            return null;
+        }
+        return self::parseInteger( $nst, $i_iMin, $i_iMax );
+    }
+
+
+    public function shiftIntegerEx( int     $i_iMin = PHP_INT_MIN,
+                                    int     $i_iMax = PHP_INT_MAX,
+                                    ?string $i_nstRequired = null ) : int {
+        $ni = $this->shiftInteger( $i_iMin, $i_iMax );
+        if ( is_int( $ni ) ) {
+            return $ni;
+        }
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing integer argument' );
+    }
+
+
     /** @param string[] $i_rstKeywords The acceptable values for this parameter. */
     public function shiftKeyword( array $i_rstKeywords ) : ?string {
         $nst = $this->shiftString();
@@ -551,7 +580,7 @@ class Arguments extends ArgumentParser implements Countable {
         if ( is_string( $nst ) ) {
             return $nst;
         }
-        $stKeywords = self::summarizeKeywords( $i_rstKeywords );
+        $stKeywords = Parse::summarizeOptions( $i_rstKeywords );
         throw new MissingArgumentException( $i_nstRequired ?? "Missing keyword ({$stKeywords}) argument" );
     }
 
@@ -595,7 +624,7 @@ class Arguments extends ArgumentParser implements Countable {
         if ( is_string( $nst ) ) {
             return $nst;
         }
-        $stKeywords = self::summarizeKeywords( array_keys( $i_rMap ) );
+        $stKeywords = Parse::summarizeOptions( array_keys( $i_rMap ) );
         throw new MissingArgumentException( $i_nstRequired ?? "Missing one of ({$stKeywords}) argument" );
     }
 
@@ -676,12 +705,6 @@ class Arguments extends ArgumentParser implements Countable {
             return $ni;
         }
         throw new MissingArgumentException( $i_nstRequired ?? 'Missing unsigned integer argument' );
-    }
-
-
-    public static function fromString( string $i_st ) : static {
-        $parsed = StringParser::parseString( $i_st );
-        return new static( $parsed->getSegments() );
     }
 
 
