@@ -38,7 +38,7 @@ class ArgumentParserTest extends TestCase {
 
     public function testParseGlobNoMatch() : void {
         static::expectException( BadArgumentException::class );
-        ArgumentParser::parseGlob( __DIR__ . '/data/*.foo');
+        ArgumentParser::parseGlob( __DIR__ . '/data/*.foo' );
     }
 
 
