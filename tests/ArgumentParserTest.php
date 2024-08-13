@@ -49,6 +49,13 @@ class ArgumentParserTest extends TestCase {
     }
 
 
+    public function testParseExistingFilename() : void {
+        static::assertSame( __FILE__, ArgumentParser::parseExistingFilename( __FILE__ ) );
+        static::expectException( BadArgumentException::class );
+        ArgumentParser::parseExistingFilename( __DIR__ . '/foo' );
+    }
+
+
     /**
      * @noinspection PhpDeprecationInspection
      * @suppress PhanDeprecatedFunction
@@ -57,6 +64,16 @@ class ArgumentParserTest extends TestCase {
         self::assertEqualsWithDelta( 1.23, ArgumentParser::parseFloat( '1.23' ), 0.001 );
         static::expectException( BadArgumentException::class );
         ArgumentParser::parseFloat( 'foo' );
+    }
+
+
+    /**
+     * @noinspection PhpDeprecationInspection
+     * @suppress PhanDeprecatedFunction
+     */
+    public function testParseFloatForOutOfRange() : void {
+        static::expectException( BadArgumentException::class );
+        ArgumentParser::parseFloat( '1.0', 3.0, 6.0 );
     }
 
 
@@ -134,6 +151,16 @@ class ArgumentParserTest extends TestCase {
      * @noinspection PhpDeprecationInspection
      * @suppress PhanDeprecatedFunction
      */
+    public function testParseIntegerForOutOfRange() : void {
+        static::expectException( BadArgumentException::class );
+        ArgumentParser::parseInteger( '10', 1, 3 );
+    }
+
+
+    /**
+     * @noinspection PhpDeprecationInspection
+     * @suppress PhanDeprecatedFunction
+     */
     public function testParseKeywords() : void {
         self::assertSame( 'foo', ArgumentParser::parseKeywords( 'foo', [ 'foo' ] ) );
         static::expectException( BadArgumentException::class );
@@ -180,9 +207,9 @@ class ArgumentParserTest extends TestCase {
      * @suppress PhanDeprecatedFunction
      */
     public function testParseUnsignedInteger() : void {
-        self::assertSame( 123, ArgumentParser::parsePositiveInteger( '123', 1000 ) );
+        self::assertSame( 123, ArgumentParser::parseUnsignedInteger( '123', 1000 ) );
         static::expectException( BadArgumentException::class );
-        ArgumentParser::parsePositiveInteger( 'foo', 1000 );
+        ArgumentParser::parseUnsignedInteger( 'foo', 1000 );
     }
 
 
