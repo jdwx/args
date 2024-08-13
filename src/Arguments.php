@@ -8,8 +8,12 @@ namespace JDWX\Args;
 
 
 use Countable;
+use JDWX\Param\IParameter;
+use JDWX\Param\Parameter;
 use JDWX\Param\Parse;
+use JDWX\Param\ParseException;
 use LogicException;
+use TypeError;
 
 
 class Arguments extends ArgumentParser implements Countable {
@@ -289,7 +293,7 @@ class Arguments extends ArgumentParser implements Countable {
      * it is, the argument is (by default) removed from the list. If it is
      * not, the list is unchanged.
      *
-     * There are a number of legacy use cases where this is useful, but new
+     * There are a number of legacy use cases where this is required, but new
      * code should use handleOptions() instead.
      *
      */
@@ -307,12 +311,21 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftBoolean() : ?bool {
-        $nst = $this->shiftString();
-        if ( $nst === null ) {
+    public function shift() : ?IParameter {
+        if ( $this->empty() ) {
             return null;
         }
-        return self::parseBoolean( $nst );
+        return new Parameter( array_shift( $this->args ) );
+    }
+
+
+    public function shiftBoolean() : ?bool {
+        $np = $this->shift();
+        try {
+            return $np?->asBool();
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
+        }
     }
 
 
@@ -326,11 +339,12 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     public function shiftEmailAddress() : ?string {
-        $nst = $this->shiftString();
-        if ( ! is_string( $nst ) ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asEmailAddress();
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseEmailAddress( $nst );
     }
 
 
@@ -343,12 +357,22 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftExistingDirectory() : ?string {
-        $nst = $this->shiftString();
-        if ( ! is_string( $nst ) ) {
-            return null;
+    public function shiftEx() : Parameter {
+        $np = $this->shift();
+        if ( $np instanceof Parameter ) {
+            return $np;
         }
-        return self::parseExistingDirectory( $nst );
+        throw new MissingArgumentException( "Missing argument" );
+    }
+
+
+    public function shiftExistingDirectory() : ?string {
+        $np = $this->shift();
+        try {
+            return $np?->asExistingDirectory();
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
+        }
     }
 
 
@@ -367,12 +391,11 @@ class Arguments extends ArgumentParser implements Countable {
      * the filename into the string argument, if one is given.
      */
     public function shiftExistingFileBody( ?string &$o_nstFilename = null ) : ?string {
-        $nst = $this->shiftExistingFilename();
-        if ( ! is_string( $nst ) ) {
-            $o_nstFilename = null;
+        $np = $this->shift();
+        if ( ! $np instanceof IParameter ) {
             return null;
         }
-        return self::parseExistingFileBody( $nst, $o_nstFilename );
+        return self::parseExistingFileBody( $np->asString(), $o_nstFilename );
     }
 
 
@@ -383,8 +406,7 @@ class Arguments extends ArgumentParser implements Countable {
      */
     public function shiftExistingFileBodyEx( ?string &$o_nstFilename = null, ?string $i_nstRequired = null ) : string {
         $st = $this->shiftExistingFilenameEx( $i_nstRequired );
-        $o_nstFilename = $st;
-        return file_get_contents( $st );
+        return self::parseExistingFileBody( $st, $o_nstFilename );
     }
 
 
@@ -392,11 +414,12 @@ class Arguments extends ArgumentParser implements Countable {
      * Expects a string argument that is the name of an existing file.
      */
     public function shiftExistingFilename() : ?string {
-        $nst = $this->shiftString();
-        if ( ! is_string( $nst ) ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asExistingFilename();
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseExistingFilename( $nst );
     }
 
 
@@ -419,11 +442,12 @@ class Arguments extends ArgumentParser implements Countable {
      */
     public function shiftFloat( float $i_fMin = -PHP_FLOAT_MAX,
                                 float $i_fMax = PHP_FLOAT_MAX ) : ?float {
-        $nst = $this->shiftString();
-        if ( $nst === null ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asFloatRangeHalfClosed( $i_fMin, $i_fMax );
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseFloat( $nst, $i_fMin, $i_fMax );
     }
 
 
@@ -447,11 +471,11 @@ class Arguments extends ArgumentParser implements Countable {
      *                   no argument is available.
      */
     public function shiftGlob( bool $i_bAllowEmpty = false ) : ?array {
-        $nst = $this->shiftString();
-        if ( $nst === null ) {
+        $np = $this->shift();
+        if ( ! $np instanceof IParameter ) {
             return null;
         }
-        return self::parseGlob( $nst, $i_bAllowEmpty );
+        return self::parseGlob( $np->asString(), $i_bAllowEmpty );
     }
 
 
@@ -472,11 +496,12 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     public function shiftHostname() : ?string {
-        $nst = $this->shiftString();
-        if ( ! is_string( $nst ) ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asHostname();
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseHostname( $nst );
     }
 
 
@@ -490,11 +515,12 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     public function shiftIPAddress() : ?string {
-        $nst = $this->shiftString();
-        if ( ! is_string( $nst ) ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asIP();
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseIPAddress( $nst );
     }
 
 
@@ -508,11 +534,12 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     public function shiftIPv4Address() : ?string {
-        $nst = $this->shiftString();
-        if ( ! is_string( $nst ) ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asIPv4();
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseIPv4Address( $nst );
     }
 
 
@@ -526,11 +553,12 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     public function shiftIPv6Address() : ?string {
-        $nst = $this->shiftString();
-        if ( ! is_string( $nst ) ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asIPv6();
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseIPv6Address( $nst );
     }
 
 
@@ -545,11 +573,12 @@ class Arguments extends ArgumentParser implements Countable {
 
     public function shiftInteger( int $i_iMin = PHP_INT_MIN,
                                   int $i_iMax = PHP_INT_MAX ) : ?int {
-        $nst = $this->shiftString();
-        if ( $nst === null ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asIntRangeOpen( $i_iMin, $i_iMax );
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseInteger( $nst, $i_iMin, $i_iMax );
     }
 
 
@@ -566,11 +595,12 @@ class Arguments extends ArgumentParser implements Countable {
 
     /** @param string[] $i_rstKeywords The acceptable values for this parameter. */
     public function shiftKeyword( array $i_rstKeywords ) : ?string {
-        $nst = $this->shiftString();
-        if ( $nst === null ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asKeyword( $i_rstKeywords );
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseKeywords( $nst, $i_rstKeywords );
     }
 
 
@@ -599,11 +629,12 @@ class Arguments extends ArgumentParser implements Countable {
      * ]
      */
     public function shiftMap( array $i_rMap ) : ?string {
-        $nst = $this->shiftString();
-        if ( $nst === null ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asMap( $i_rMap );
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseMap( $nst, $i_rMap );
     }
 
 
@@ -634,11 +665,12 @@ class Arguments extends ArgumentParser implements Countable {
      * but could be created. E.g., any referenced parent directories must exist.
      */
     public function shiftNonexistentFilename() : ?string {
-        $nst = $this->shiftString();
-        if ( ! is_string( $nst ) ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asNonexistentFilename();
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseNonexistentFilename( $nst );
     }
 
 
@@ -647,7 +679,7 @@ class Arguments extends ArgumentParser implements Countable {
      * but could be created. E.g., any referenced parent directories must exist.
      */
     public function shiftNonexistentFilenameEx( ?string $i_nstRequired = null ) : string {
-        $nst = $this->shiftString();
+        $nst = $this->shiftNonexistentFilename();
         if ( is_string( $nst ) ) {
             return $nst;
         }
@@ -656,11 +688,12 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     public function shiftPositiveInteger( int $i_iMax = PHP_INT_MAX ) : ?int {
-        $nst = $this->shiftString();
-        if ( $nst === null ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asIntRangeOpen( 1, $i_iMax );
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parsePositiveInteger( $nst, $i_iMax );
     }
 
 
@@ -674,10 +707,12 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     public function shiftString() : ?string {
-        if ( count( $this->args ) == 0 ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asString();
+        } catch ( TypeError $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return array_shift( $this->args );
     }
 
 
@@ -691,11 +726,12 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     public function shiftUnsignedInteger( int $i_iMax = PHP_INT_MAX ) : ?int {
-        $nst = $this->shiftString();
-        if ( $nst === null ) {
-            return null;
+        $np = $this->shift();
+        try {
+            return $np?->asIntRangeOpen( 0, $i_iMax );
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
         }
-        return self::parseUnsignedInteger( $nst, $i_iMax );
     }
 
 

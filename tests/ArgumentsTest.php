@@ -5,6 +5,7 @@ use JDWX\Args\Arguments;
 use JDWX\Args\BadArgumentException;
 use JDWX\Args\ExtraArgumentsException;
 use JDWX\Args\MissingArgumentException;
+use JDWX\Param\IParameter;
 use JDWX\Param\Parse;
 use PHPUnit\Framework\TestCase;
 
@@ -212,6 +213,14 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testShift() : void {
+        $args = new Arguments( [ 'foo' ] );
+        self::assertInstanceOf( IParameter::class, $args->shift() );
+        $args->end();
+        self::assertNull( $args->shift() );
+    }
+
+
     public function testShiftBoolean() : void {
         $args = new Arguments( [ 'true', 'yes', 'on', '1', 'false', 'no', 'off', '0', 'foo' ] );
         self::assertTrue( $args->shiftBoolean() );
@@ -260,6 +269,16 @@ class ArgumentsTest extends TestCase {
         $args = new Arguments( [ 'foo' ] );
         self::expectException( BadArgumentException::class );
         $args->shiftEmailAddress();
+    }
+
+
+    public function testShiftEx() : void {
+        $args = new Arguments( [ 'foo' ] );
+        self::assertInstanceOf( IParameter::class, $args->shiftEx() );
+        $args->end();
+        self::expectException( MissingArgumentException::class );
+        self::assertNull( $args->shiftEx() );
+
     }
 
 
@@ -681,6 +700,13 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testShiftNonexistentFilenameExForExistingFile() : void {
+        $args = new Arguments( [ __FILE__ ] );
+        self::expectException( BadArgumentException::class );
+        $args->shiftNonexistentFilenameEx();
+    }
+
+
     public function testShiftNonexistentFilenameForBadDirectory() : void {
         $st = __DIR__ . '/nonexistent-directory-xyz123/nonexistent-file-xyz123';
         $args = new Arguments( [ $st ] );
@@ -735,12 +761,22 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    /** @suppress PhanTypeMismatchArgument */
     public function testShiftString() : void {
         $args = new Arguments( [ 'Hello', 'world!' ] );
         self::assertEquals( 'Hello', $args->shiftString() );
         self::assertEquals( 'world!', $args->shiftString() );
         $args->end();
         self::assertNull( $args->shiftString() );
+
+        /**
+         * @noinspection PhpParamsInspection
+         * @phpstan-ignore argument.type
+         */
+        $args = new Arguments( [ [ 'foo', 'bar' ] ] );
+        self::expectException( BadArgumentException::class );
+        $args->shiftString();
+
     }
 
 
