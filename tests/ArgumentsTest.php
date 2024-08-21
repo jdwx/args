@@ -16,6 +16,20 @@ class ArgumentsTest extends TestCase {
     private ?string $tmpFile = null;
 
 
+    public function testCopy() : void {
+        $args = new Arguments( [ 'foo', 'bar' ] );
+        $args2 = $args->copy();
+        self::assertEquals( 'foo', $args->shiftString() );
+        self::assertEquals( 'bar', $args->shiftString() );
+        self::assertTrue( $args->empty() );
+        self::assertFalse( $args2->empty() );
+        self::assertEquals( 'foo', $args2->shiftString() );
+        self::assertEquals( 'bar', $args2->shiftString() );
+        self::assertTrue( $args2->empty() );
+
+    }
+
+
     public function testCount() : void {
         $args = new Arguments( [ 'Hello', 'world!' ] );
         self::assertEquals( 2, $args->count() );

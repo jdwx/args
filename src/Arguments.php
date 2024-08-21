@@ -30,6 +30,11 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    public function copy() : static {
+        return new static( $this->args );
+    }
+
+
     public function count() : int {
         return count( $this->args );
     }
