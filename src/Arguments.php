@@ -343,6 +343,25 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    public function shiftCurrency() : ?int {
+        $np = $this->shift();
+        try {
+            return $np?->asCurrency();
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
+        }
+    }
+
+
+    public function shiftCurrencyEx( string $i_nstRequired = null ) : int {
+        $ni = $this->shiftCurrency();
+        if ( is_int( $ni ) ) {
+            return $ni;
+        }
+        throw new MissingArgumentException( $i_nstRequired ?? 'Missing currency argument' );
+    }
+
+
     public function shiftEmailAddress() : ?string {
         $np = $this->shift();
         try {
