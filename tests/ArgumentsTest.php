@@ -264,6 +264,24 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testShiftConstant() : void {
+        $args = new Arguments( [ 'foo' ] );
+        self::assertEquals( 'foo', $args->shiftConstant( 'foo' ) );
+        self::assertNull( $args->shiftConstant( 'foo' ) );
+        self::expectException( BadArgumentException::class );
+        $args = new Arguments( [ 'foo' ] );
+        $args->shiftConstant( 'bar' );
+    }
+
+
+    public function testShiftConstantEx() : void {
+        $args = new Arguments( [ 'foo' ] );
+        self::assertEquals( 'foo', $args->shiftConstantEx( 'foo' ) );
+        self::expectException( MissingArgumentException::class );
+        $args->shiftConstantEx( 'foo' );
+    }
+
+
     public function testShiftCurrency() : void {
         $args = new Arguments( [ '$123.45', '123.45', 'foo' ] );
         self::assertSame( 12345, $args->shiftCurrency() );

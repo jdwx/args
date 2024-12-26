@@ -343,6 +343,25 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
+    public function shiftConstant( string $i_stConstant ) : ?string {
+        $np = $this->shift();
+        try {
+            return $np?->asConstant( $i_stConstant );
+        } catch ( ParseException $e ) {
+            throw new BadArgumentException( $np, $e );
+        }
+    }
+
+
+    public function shiftConstantEx( string $i_stConstant ) : string {
+        $nst = $this->shiftConstant( $i_stConstant );
+        if ( is_string( $nst ) ) {
+            return $nst;
+        }
+        throw new MissingArgumentException( "Missing constant argument '{$i_stConstant}'" );
+    }
+
+
     public function shiftCurrency() : ?int {
         $np = $this->shift();
         try {
