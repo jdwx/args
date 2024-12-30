@@ -334,7 +334,7 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftBooleanEx( string $i_nstRequired = null ) : bool {
+    public function shiftBooleanEx( ?string $i_nstRequired = null ) : bool {
         $nb = $this->shiftBoolean();
         if ( is_bool( $nb ) ) {
             return $nb;
