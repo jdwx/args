@@ -16,21 +16,31 @@ use LogicException;
 use TypeError;
 
 
-class Arguments extends ArgumentParser implements ArgumentsInterface, Countable {
+class Arguments extends ArgumentParser implements Countable {
 
 
     /** @param list<string> $args */
     public function __construct( protected array $args ) {}
 
 
-    public static function fromString( string $i_st ) : static {
+    /**
+     * You need to overload this in child classes or else it
+     * will copy the wrong class!
+     */
+    public static function fromString( string $i_st ) : self {
         $parsed = StringParser::parseString( $i_st );
-        return new static( $parsed->getSegments() );
+        assert( static::class === self::class );
+        return new self( $parsed->getSegments() );
     }
 
 
-    public function copy() : static {
-        return new static( $this->args );
+    /**
+     * You need to overload this in child classes or else it
+     * will copy the wrong class!
+     */
+    public function copy() : self {
+        assert( $this::class === self::class );
+        return new self( $this->args );
     }
 
 
@@ -212,7 +222,7 @@ class Arguments extends ArgumentParser implements ArgumentsInterface, Countable 
         $rOptions = $this->handleOptionsAllowed( array_keys( $i_rstOptions ) );
         foreach ( $i_rstOptions as $stKey => $stValue ) {
             if ( array_key_exists( $stKey, $rOptions ) ) {
-                if ( $rOptions[ $stKey ] === true && is_string( $stValue ) ) {
+                if ( $rOptions[ $stKey ] === true && $stValue !== false ) {
                     continue;
                 }
                 $i_rstOptions[ $stKey ] = $rOptions[ $stKey ];

@@ -204,6 +204,26 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testHandleOptionsDefinedForDefaultInt() : void {
+        $args = new Arguments( [] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => 123 ] );
+        self::assertEquals( 123, $rOptions[ 'foo' ] );
+
+        $args = new Arguments( [ '--foo' ] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => 123 ] );
+        self::assertEquals( 123, $rOptions[ 'foo' ] );
+
+        $args = new Arguments( [ '--foo=456' ] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => 123 ] );
+        self::assertEquals( 456, $rOptions[ 'foo' ] );
+
+        $args = new Arguments( [ '--no-foo' ] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => 123 ] );
+        self::assertFalse( $rOptions[ 'foo' ] );
+
+    }
+
+
     public function testHandleOptionsDefinedForDefaultTrue() : void {
         $args = new Arguments( [ '--foo' ] );
         $rOptions = $args->handleOptionsDefined( [ 'foo' => true ] );
