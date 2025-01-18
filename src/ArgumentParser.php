@@ -43,7 +43,10 @@ class ArgumentParser {
     }
 
 
-    /** @noinspection PhpUsageOfSilenceOperatorInspection */
+    /**
+     * @noinspection PhpUsageOfSilenceOperatorInspection
+     * @phpstan-ignore parameterByRef.unusedType
+     */
     public static function parseExistingFileBody( string $i_st, ?string &$o_stFilename ) : string {
         $o_stFilename = static::parseExistingFilename( $i_st );
         $x = @file_get_contents( $o_stFilename );

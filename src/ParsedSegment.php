@@ -132,6 +132,7 @@ class ParsedSegment {
     private function substVariablesBare( array $i_rVariables ) : true|string {
         $bst = true;
         $st = preg_replace_callback( '/\$([a-zA-Z_][a-zA-Z0-9_]*)/', function ( $matches ) use ( &$i_rVariables, &$bst ) {
+            /** @phpstan-ignore notIdentical.alwaysTrue */
             if ( true !== $bst ) {
                 return "";
             }
@@ -155,6 +156,7 @@ class ParsedSegment {
             $bst = "Undefined variable: {$stVar}";
             return $stVar;
         }, $this->textProcessed );
+        /** @phpstan-ignore notIdentical.alwaysTrue */
         if ( $bst !== true ) {
             return $bst;
         }
@@ -184,6 +186,7 @@ class ParsedSegment {
             return $stVar;
         }, $this->textProcessed );
 
+        /** @phpstan-ignore function.alreadyNarrowedType */
         if ( is_string( $bst ) ) {
             return $bst;
         }

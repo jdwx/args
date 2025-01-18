@@ -28,7 +28,6 @@ class StringParser {
         if ( $i_bBackquotes ) {
             $stQuoteChars .= '`';
         }
-        assert( $pln instanceof ParsedString );
         while ( $st !== "" ) {
             $iSpan = strcspn( $st, $stQuoteChars );
             $stUnquoted = substr( $st, 0, $iSpan );
