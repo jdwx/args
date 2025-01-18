@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpMethodNamingConventionInspection */
 
 
 use JDWX\Args\Arguments;
@@ -45,7 +45,6 @@ class ArgumentsTest extends TestCase {
         $args->shiftString();
         $args->shiftString();
         self::assertTrue( $args->empty() );
-        self::assertEmpty( $args );
         $args->end();
     }
 
@@ -190,6 +189,50 @@ class ArgumentsTest extends TestCase {
     }
 
 
+    public function testHandleOptionsDefinedForDefaultFalse() : void {
+        $args = new Arguments( [ '--foo' ] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => false ] );
+        self::assertTrue( $rOptions[ 'foo' ] );
+
+        $args = new Arguments( [] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => false ] );
+        self::assertFalse( $rOptions[ 'foo' ] );
+
+        $args = new Arguments( [ '--no-foo' ] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => false ] );
+        self::assertFalse( $rOptions[ 'foo' ] );
+    }
+
+
+    public function testHandleOptionsDefinedForDefaultTrue() : void {
+        $args = new Arguments( [ '--foo' ] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => true ] );
+        self::assertTrue( $rOptions[ 'foo' ] );
+
+        $args = new Arguments( [] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => true ] );
+        self::assertTrue( $rOptions[ 'foo' ] );
+
+        $args = new Arguments( [ '--no-foo' ] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => true ] );
+        self::assertFalse( $rOptions[ 'foo' ] );
+    }
+
+
+    public function testHandleOptionsDefinedForFalseWithDefaultString() : void {
+        $args = new Arguments( [ '--no-foo' ] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => 'bar' ] );
+        self::assertFalse( $rOptions[ 'foo' ] );
+    }
+
+
+    public function testHandleOptionsDefinedForTrueWithDefaultString() : void {
+        $args = new Arguments( [ '--foo' ] );
+        $rOptions = $args->handleOptionsDefined( [ 'foo' => 'bar' ] );
+        self::assertEquals( 'bar', $rOptions[ 'foo' ] );
+    }
+
+
     public function testPeekKeywords() : void {
         $rKeywords = [ 'foo', 'bar' ];
         $args = new Arguments( [ 'foo', 'bar', 'baz' ] );
@@ -326,7 +369,7 @@ class ArgumentsTest extends TestCase {
         self::assertInstanceOf( IParameter::class, $args->shiftEx() );
         $args->end();
         self::expectException( MissingArgumentException::class );
-        self::assertNull( $args->shiftEx() );
+        $args->shiftEx();
 
     }
 
@@ -486,8 +529,9 @@ class ArgumentsTest extends TestCase {
     public function testShiftGlob() : void {
         $args = new Arguments( [ __DIR__ . '/data/*.txt' ] );
         $r = $args->shiftGlob();
-        static::assertIsArray( $r );
         assert( is_array( $r ) );
+        /** @phpstan-ignore staticMethod.alreadyNarrowedType */
+        static::assertIsArray( $r );
         self::assertCount( 3, $r );
         self::assertContains( __DIR__ . '/data/a.txt', $r );
         self::assertContains( __DIR__ . '/data/b.txt', $r );

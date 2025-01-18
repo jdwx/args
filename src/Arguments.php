@@ -16,7 +16,7 @@ use LogicException;
 use TypeError;
 
 
-class Arguments extends ArgumentParser implements Countable {
+class Arguments extends ArgumentParser implements ArgumentsInterface, Countable {
 
 
     /** @param list<string> $args */
@@ -25,7 +25,6 @@ class Arguments extends ArgumentParser implements Countable {
 
     public static function fromString( string $i_st ) : static {
         $parsed = StringParser::parseString( $i_st );
-        /** @phpstan-ignore new.static */
         return new static( $parsed->getSegments() );
     }
 
@@ -202,16 +201,20 @@ class Arguments extends ArgumentParser implements Countable {
      *                              associated values given.
      *
      * Takes an array of options and their default values. E.g.,
-     * [ 'happy' => true, 'value' => 42 ]. The default value is used
-     * if the option is specified by itself. E.g., "--value" returns
+     * [ 'happy' => true, 'value' => 42 ]. A default string value is
+     * used if the option is specified by itself. E.g., "--value" returns
      * [ 'value' => 42 ], but "--value=99" returns [ 'value' => 99 ].
+     * If the default value is false, "--value" returns [ 'value' => true ].
      * Returns an array with the options that were found as keys and
      * the values provided or taken from the defaults as values.
      */
     public function handleOptionsDefined( array $i_rstOptions ) : array {
         $rOptions = $this->handleOptionsAllowed( array_keys( $i_rstOptions ) );
         foreach ( $i_rstOptions as $stKey => $stValue ) {
-            if ( array_key_exists( $stKey, $rOptions ) && $rOptions[ $stKey ] !== true ) {
+            if ( array_key_exists( $stKey, $rOptions ) ) {
+                if ( $rOptions[ $stKey ] === true && is_string( $stValue ) ) {
+                    continue;
+                }
                 $i_rstOptions[ $stKey ] = $rOptions[ $stKey ];
             }
         }
