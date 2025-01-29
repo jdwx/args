@@ -38,7 +38,8 @@ class Arguments extends ArgumentParser implements Countable {
      *                        given does not parse as boolean.
      * @return bool The boolean value of the option.
      */
-    public static function booleanOption( string $i_stName, bool|string|null $i_xValue, bool $i_bStrict = false ) : bool {
+    public static function booleanOption( string  $i_stName, bool|string|null $i_xValue, bool $i_bStrict = false,
+                                          ?string $i_nstMessage = null ) : bool {
         if ( is_bool( $i_xValue ) ) {
             return $i_xValue;
         }
@@ -51,7 +52,7 @@ class Arguments extends ArgumentParser implements Countable {
             if ( ! $i_bStrict ) {
                 return true;
             }
-            $stReason = "Expected boolean for option \"{$i_stName}\"";
+            $stReason = $i_nstMessage ?? "Expected boolean for option \"{$i_stName}\"";
             throw new BadArgumentException( $i_xValue, $stReason, $e->getCode(), $e );
         }
 
@@ -66,6 +67,67 @@ class Arguments extends ArgumentParser implements Countable {
         $parsed = StringParser::parseString( $i_st );
         assert( static::class === self::class );
         return new self( $parsed->getSegments() );
+    }
+
+
+    /**
+     * A convenience function for dealing with string options that might have
+     * default values.
+     *
+     * @param bool|string|null $i_xValue
+     * @param string|null $i_nstTrueDefault
+     * @return string|null
+     */
+    public static function stringOption( bool|string|null $i_xValue,
+                                         ?string          $i_nstTrueDefault = null ) : ?string {
+        if ( is_null( $i_xValue ) || false === $i_xValue ) {
+            return null;
+        }
+
+        if ( true === $i_xValue && is_string( $i_nstTrueDefault ) ) {
+            return $i_nstTrueDefault;
+        }
+
+        # At this point, the value is a string.
+        assert( is_string( $i_xValue ) );
+
+        # If we were given a default value for true, we want to replace the
+        # given value if (and only if) it parses as true.
+        if ( is_string( $i_nstTrueDefault ) ) {
+            try {
+                if ( Parse::bool( $i_xValue ) ) {
+                    return $i_nstTrueDefault;
+                } else {
+                    return null;
+                }
+            } catch ( ParseException ) {
+                // This indicates a custom value was provided.
+            }
+        }
+        return $i_xValue;
+    }
+
+
+    /**
+     * A convenience function for dealing with string options that really need to
+     * be present.
+     *
+     * @param string $i_stName
+     * @param bool|string|null $i_xValue
+     * @param string|null $i_nstTrueDefault
+     * @param string|null $i_nstMessage
+     * @return string
+     */
+    public static function stringOptionEx( string  $i_stName, bool|string|null $i_xValue,
+                                           ?string $i_nstTrueDefault = null,
+                                           ?string $i_nstMessage = '' ) : string {
+        $nst = self::stringOption( $i_xValue, $i_nstTrueDefault );
+        if ( is_string( $nst ) ) {
+            return $nst;
+        }
+        throw new MissingArgumentException(
+            $i_nstMessage ?? "Missing string argument for option \"{$i_stName}\""
+        );
     }
 
 
