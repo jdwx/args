@@ -16,6 +16,22 @@ class ArgumentsTest extends TestCase {
     private ?string $tmpFile = null;
 
 
+    public function testBooleanOption() : void {
+        self::assertTrue( Arguments::booleanOption( 'test', true ) );
+        self::assertTrue( Arguments::booleanOption( 'test', '1' ) );
+        self::assertTrue( Arguments::booleanOption( 'test', 'on' ) );
+        self::assertTrue( Arguments::booleanOption( 'test', 'yes' ) );
+        self::assertTrue( Arguments::booleanOption( 'test', 'foo' ) );
+        self::assertFalse( Arguments::booleanOption( 'test', false ) );
+        self::assertFalse( Arguments::booleanOption( 'test', null ) );
+        self::assertFalse( Arguments::booleanOption( 'test', '0' ) );
+        self::assertFalse( Arguments::booleanOption( 'test', 'off' ) );
+        self::assertFalse( Arguments::booleanOption( 'test', 'no' ) );
+        self::expectException( BadArgumentException::class );
+        Arguments::booleanOption( 'test', 'bar', true );
+    }
+
+
     public function testCopy() : void {
         $args = new Arguments( [ 'foo', 'bar' ] );
         $args2 = $args->copy();

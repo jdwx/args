@@ -24,6 +24,41 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
+     * This is a convenience method for parsing a boolean option, handling
+     * cases like "--do-the-thing=yes" as well as "--do-the-thing" alone.
+     *
+     * If strict mode is not specified (the default), then any value that
+     * does not parse as a boolean is treated as true. Otherwise, a
+     * non-boolean value will throw a BadArgumentException explaining
+     * that a boolean was expected for the named option.
+     *
+     * @param string $i_stName The name of the option.
+     * @param bool|string|null $i_xValue The value provided.
+     * @param bool $i_bStrict If true, an exception is thrown if the value
+     *                        given does not parse as boolean.
+     * @return bool The boolean value of the option.
+     */
+    public static function booleanOption( string $i_stName, bool|string|null $i_xValue, bool $i_bStrict = false ) : bool {
+        if ( is_bool( $i_xValue ) ) {
+            return $i_xValue;
+        }
+        if ( is_null( $i_xValue ) ) {
+            return false;
+        }
+        try {
+            return Parse::bool( $i_xValue );
+        } catch ( ParseException $e ) {
+            if ( ! $i_bStrict ) {
+                return true;
+            }
+            $stReason = "Expected boolean for option \"{$i_stName}\"";
+            throw new BadArgumentException( $i_xValue, $stReason, $e->getCode(), $e );
+        }
+
+    }
+
+
+    /**
      * You need to overload this in child classes or else it
      * will copy the wrong class!
      */
