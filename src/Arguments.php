@@ -116,7 +116,7 @@ class Arguments extends ArgumentParser implements Countable {
         if ( 0 != count( $rFiles ) ) {
             return $rFiles;
         }
-        throw new MissingArgumentException( "Missing glob argument" );
+        throw new MissingArgumentException( 'Missing glob argument' );
     }
 
 
@@ -127,7 +127,7 @@ class Arguments extends ArgumentParser implements Countable {
         if ( $this->empty() ) {
             return null;
         }
-        return join( " ", $this->endWithArray() );
+        return join( ' ', $this->endWithArray() );
     }
 
 
@@ -135,7 +135,7 @@ class Arguments extends ArgumentParser implements Countable {
      * Returns the remaining arguments, separated by spaces, as a single string.
      * Requires at least one argument to be present.
      */
-    public function endWithStringEx( string $i_stMissing = "Missing argument" ) : string {
+    public function endWithStringEx( string $i_stMissing = 'Missing argument' ) : string {
         $nst = $this->endWithString();
         if ( is_string( $nst ) ) {
             return $nst;
@@ -199,18 +199,18 @@ class Arguments extends ArgumentParser implements Countable {
                 $rstNewArgs[] = $stArg;
                 continue;
             }
-            if ( "--" === $stArg ) {
+            if ( '--' === $stArg ) {
                 $bSkip = true;
                 continue;
             }
-            if ( str_starts_with( $stArg, "--" ) ) {
+            if ( str_starts_with( $stArg, '--' ) ) {
                 $stArg = substr( $stArg, 2 );
-                if ( str_contains( $stArg, "=" ) ) {
-                    [ $stKey, $stValue ] = explode( "=", $stArg, 2 );
+                if ( str_contains( $stArg, '=' ) ) {
+                    [ $stKey, $stValue ] = explode( '=', $stArg, 2 );
                     $rOptions[ $stKey ] = $stValue;
                     continue;
                 }
-                if ( str_starts_with( $stArg, "no-" ) ) {
+                if ( str_starts_with( $stArg, 'no-' ) ) {
                     $stArg = substr( $stArg, 3 );
                     $rOptions[ $stArg ] = false;
                     continue;
@@ -239,7 +239,7 @@ class Arguments extends ArgumentParser implements Countable {
                 continue;
             }
             if ( is_bool( $bstValue ) ) {
-                throw new BadArgumentException( $bstValue ? "true" : "false", "Unknown option \"{$stKey}\"" );
+                throw new BadArgumentException( $bstValue ? 'true' : 'false', "Unknown option \"{$stKey}\"" );
             }
             throw new BadArgumentException( $bstValue, "Unknown option \"{$stKey}\"" );
         }
@@ -323,7 +323,7 @@ class Arguments extends ArgumentParser implements Countable {
      */
     public function peekString( ?string $i_stPrefix = null, bool $i_bConsume = false ) : ?string {
         if ( ! is_string( $i_stPrefix ) && $i_bConsume ) {
-            throw new LogicException( "A prefix is required to consume. Consider using shiftString() instead." );
+            throw new LogicException( 'A prefix is required to consume. Consider using shiftString() instead.' );
         }
         if ( count( $this->args ) == 0 ) {
             return null;
@@ -461,7 +461,7 @@ class Arguments extends ArgumentParser implements Countable {
         if ( $np instanceof Parameter ) {
             return $np;
         }
-        throw new MissingArgumentException( "Missing argument" );
+        throw new MissingArgumentException( 'Missing argument' );
     }
 
 
