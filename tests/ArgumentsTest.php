@@ -16,29 +16,6 @@ class ArgumentsTest extends TestCase {
     private ?string $tmpFile = null;
 
 
-    public function testBooleanOption() : void {
-        self::assertTrue( Arguments::booleanOption( 'test', true ) );
-        self::assertTrue( Arguments::booleanOption( 'test', '1' ) );
-        self::assertTrue( Arguments::booleanOption( 'test', 'on' ) );
-        self::assertTrue( Arguments::booleanOption( 'test', 'yes' ) );
-        self::assertTrue( Arguments::booleanOption( 'test', 'foo' ) );
-        self::assertFalse( Arguments::booleanOption( 'test', false ) );
-        self::assertFalse( Arguments::booleanOption( 'test', null ) );
-        self::assertFalse( Arguments::booleanOption( 'test', '0' ) );
-        self::assertFalse( Arguments::booleanOption( 'test', 'off' ) );
-        self::assertFalse( Arguments::booleanOption( 'test', 'no' ) );
-        self::expectException( BadArgumentException::class );
-        Arguments::booleanOption( 'test', 'bar', true );
-    }
-
-
-    public function testBooleanOptionForCustomMessage() : void {
-        self::expectExceptionMessage( 'FOO_BAR' );
-        self::expectException( BadArgumentException::class );
-        Arguments::booleanOption( 'test', 'bar', true, 'FOO_BAR' );
-    }
-
-
     public function testCopy() : void {
         $args = new Arguments( [ 'foo', 'bar' ] );
         $args2 = $args->copy();
@@ -69,6 +46,33 @@ class ArgumentsTest extends TestCase {
         $args->shiftString();
         self::assertTrue( $args->empty() );
         $args->end();
+    }
+
+
+    public function testEndOptionsForNotTrue() : void {
+        $args = new Arguments( [ '--foo=bar' ] );
+        self::expectException( ExtraArgumentsException::class );
+        $args->endOptions();
+    }
+
+
+    public function testEndOptionsForTrue() : void {
+        $args = new Arguments( [] );
+        $args->endOptions();
+
+        $args = new Arguments( [ 'foo' ] );
+        $args->endOptions();
+
+        $args = new Arguments( [ '--', '--foo' ] );
+        $args->endOptions();
+
+        self::assertSame( '--foo', $args->shiftString() );
+
+        $args = new Arguments( [ '--', '--foo', '--' ] );
+        $args->endOptions();
+
+        self::assertSame( '--foo', $args->shiftString() );
+        self::assertSame( '--', $args->shiftString() );
     }
 
 
@@ -954,33 +958,6 @@ class ArgumentsTest extends TestCase {
         $args = new Arguments( [ '-100' ] );
         self::expectException( BadArgumentException::class );
         $args->shiftUnsignedInteger();
-    }
-
-
-    public function testStringOption() : void {
-        self::assertSame( 'bar', Arguments::stringOption( 'bar' ) );
-        self::assertNull( Arguments::stringOption( null ) );
-        self::assertSame( 'bar', Arguments::stringOption( true, 'bar' ) );
-        self::assertNull( Arguments::stringOption( false, 'bar' ) );
-        self::assertSame( 'bar', Arguments::stringOption( 'true', 'bar' ) );
-        self::assertSame( 'bar', Arguments::stringOption( 'yes', 'bar' ) );
-        self::assertNull( Arguments::stringOption( 'false', 'bar' ) );
-        self::assertSame( 'bar', Arguments::stringOption( 'bar', 'baz' ) );
-    }
-
-
-    public function testStringOptionEx() : void {
-        self::assertSame( 'bar', Arguments::stringOptionEx( 'foo', 'bar' ) );
-        self::assertSame( 'bar', Arguments::stringOptionEx( 'foo', true, 'bar' ) );
-        self::expectException( MissingArgumentException::class );
-        Arguments::stringOptionEx( 'foo', false );
-    }
-
-
-    public function testStringOptionExForCustomMessage() : void {
-        self::expectExceptionMessage( 'FOO_BAR' );
-        self::expectException( MissingArgumentException::class );
-        Arguments::stringOptionEx( 'foo', false, 'bar', 'FOO_BAR' );
     }
 
 

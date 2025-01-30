@@ -24,42 +24,6 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
-     * This is a convenience method for parsing a boolean option, handling
-     * cases like "--do-the-thing=yes" as well as "--do-the-thing" alone.
-     *
-     * If strict mode is not specified (the default), then any value that
-     * does not parse as a boolean is treated as true. Otherwise, a
-     * non-boolean value will throw a BadArgumentException explaining
-     * that a boolean was expected for the named option.
-     *
-     * @param string $i_stName The name of the option.
-     * @param bool|string|null $i_xValue The value provided.
-     * @param bool $i_bStrict If true, an exception is thrown if the value
-     *                        given does not parse as boolean.
-     * @return bool The boolean value of the option.
-     */
-    public static function booleanOption( string  $i_stName, bool|string|null $i_xValue, bool $i_bStrict = false,
-                                          ?string $i_nstMessage = null ) : bool {
-        if ( is_bool( $i_xValue ) ) {
-            return $i_xValue;
-        }
-        if ( is_null( $i_xValue ) ) {
-            return false;
-        }
-        try {
-            return Parse::bool( $i_xValue );
-        } catch ( ParseException $e ) {
-            if ( ! $i_bStrict ) {
-                return true;
-            }
-            $stReason = $i_nstMessage ?? "Expected boolean for option \"{$i_stName}\"";
-            throw new BadArgumentException( $i_xValue, $stReason, $e->getCode(), $e );
-        }
-
-    }
-
-
-    /**
      * You need to overload this in child classes or else it
      * will copy the wrong class!
      */
@@ -67,67 +31,6 @@ class Arguments extends ArgumentParser implements Countable {
         $parsed = StringParser::parseString( $i_st );
         assert( static::class === self::class );
         return new self( $parsed->getSegments() );
-    }
-
-
-    /**
-     * A convenience function for dealing with string options that might have
-     * default values.
-     *
-     * @param bool|string|null $i_xValue
-     * @param string|null $i_nstTrueDefault
-     * @return string|null
-     */
-    public static function stringOption( bool|string|null $i_xValue,
-                                         ?string          $i_nstTrueDefault = null ) : ?string {
-        if ( is_null( $i_xValue ) || false === $i_xValue ) {
-            return null;
-        }
-
-        if ( true === $i_xValue && is_string( $i_nstTrueDefault ) ) {
-            return $i_nstTrueDefault;
-        }
-
-        # At this point, the value is a string.
-        assert( is_string( $i_xValue ) );
-
-        # If we were given a default value for true, we want to replace the
-        # given value if (and only if) it parses as true.
-        if ( is_string( $i_nstTrueDefault ) ) {
-            try {
-                if ( Parse::bool( $i_xValue ) ) {
-                    return $i_nstTrueDefault;
-                } else {
-                    return null;
-                }
-            } catch ( ParseException ) {
-                // This indicates a custom value was provided.
-            }
-        }
-        return $i_xValue;
-    }
-
-
-    /**
-     * A convenience function for dealing with string options that really need to
-     * be present.
-     *
-     * @param string $i_stName
-     * @param bool|string|null $i_xValue
-     * @param string|null $i_nstTrueDefault
-     * @param string|null $i_nstMessage
-     * @return string
-     */
-    public static function stringOptionEx( string  $i_stName, bool|string|null $i_xValue,
-                                           ?string $i_nstTrueDefault = null,
-                                           ?string $i_nstMessage = '' ) : string {
-        $nst = self::stringOption( $i_xValue, $i_nstTrueDefault );
-        if ( is_string( $nst ) ) {
-            return $nst;
-        }
-        throw new MissingArgumentException(
-            $i_nstMessage ?? "Missing string argument for option \"{$i_stName}\""
-        );
     }
 
 
@@ -159,6 +62,18 @@ class Arguments extends ArgumentParser implements Countable {
             return;
         }
         throw new ExtraArgumentsException( $this->args );
+    }
+
+
+    /**
+     * Asserts that we have handled all options.
+     */
+    public function endOptions() : void {
+        $rOptions = $this->handleOptions();
+        if ( 0 == count( $rOptions ) ) {
+            return;
+        }
+        throw new ExtraOptionsException( array_keys( $rOptions ) );
     }
 
 
@@ -226,6 +141,37 @@ class Arguments extends ArgumentParser implements Countable {
             return $nst;
         }
         throw new MissingArgumentException( $i_stMissing );
+    }
+
+
+    public function handleOption( string $i_stOption ) : bool|string|null {
+        $rNewArgs = [];
+        $xValue = null;
+        $bSkip = false;
+        foreach ( $this->args as $stArg ) {
+            if ( '--' === $stArg || $bSkip ) {
+                $bSkip = true;
+                $rNewArgs[] = $stArg;
+                continue;
+            }
+            if ( "--{$i_stOption}" === $stArg ) {
+                if ( $xValue === null || $xValue === false ) {
+                    $xValue = true;
+                }
+                continue;
+            }
+            if ( "--no-{$i_stOption}" === $stArg ) {
+                $xValue = false;
+                continue;
+            }
+            if ( str_starts_with( $stArg, "--{$i_stOption}=" ) ) {
+                $xValue = substr( $stArg, strlen( "--{$i_stOption}=" ) );
+                continue;
+            }
+            $rNewArgs[] = $stArg;
+        }
+        $this->args = $rNewArgs;
+        return $xValue;
     }
 
 
