@@ -17,9 +17,9 @@ use LogicException;
 class Option {
 
 
-    private ?string $nstValue;
+    private ?string $nstValue = null;
 
-    private bool $bValue;
+    private bool $bValue = false;
 
     private readonly bool $bFlagOnly;
 
@@ -28,10 +28,33 @@ class Option {
                                  private readonly ?string $nstValueOnTrue = null,
                                  private readonly ?string $nstValueOnFalse = null,
                                  ?bool                    $i_bFlagOnly = null,
-                                 bool|string              $i_bstValue = false ) {
+                                 bool|string|Arguments    $i_xValue = false ) {
         $this->bFlagOnly = $i_bFlagOnly ??
-            ( is_null( $nstValueOnTrue ) && is_null( $nstValueOnFalse ) && is_bool( $i_bstValue ) );
-        $this->set( $i_bstValue );
+            ( is_null( $nstValueOnTrue ) && is_null( $nstValueOnFalse ) && is_bool( $i_xValue ) );
+        $this->set( $i_xValue );
+    }
+
+
+    public static function simpleBool( string $i_stName, Arguments|bool|string $i_xValue ) : bool {
+        $opt = new Option( $i_stName, i_bFlagOnly: true, i_xValue: $i_xValue );
+        return $opt->asBool();
+    }
+
+
+    public static function simpleString( string  $i_stName, Arguments|bool|string $i_xValue,
+                                         ?string $i_nstValueOnTrue = null ) : ?string {
+        $opt = new Option( $i_stName, $i_nstValueOnTrue, i_bFlagOnly: false, i_xValue: $i_xValue );
+        return $opt->asString();
+    }
+
+
+    public static function simpleStringEx( string  $i_stName, Arguments|bool|string $i_xValue,
+                                           ?string $i_nstValueOnTrue = null ) : string {
+        $nst = static::simpleString( $i_stName, $i_xValue, $i_nstValueOnTrue );
+        if ( is_string( $nst ) ) {
+            return $nst;
+        }
+        throw new MissingOptionException( 'Option --' . $i_stName . ' is required.' );
     }
 
 
@@ -42,7 +65,7 @@ class Option {
 
     public function asParameter() : IParameter {
         if ( $this->bFlagOnly ) {
-            return new Parameter( $this->bValue );
+            return new Parameter( $this->bValue ? 'true' : 'false' );
         }
         return new Parameter( $this->nstValue );
     }

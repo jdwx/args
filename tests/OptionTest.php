@@ -81,7 +81,7 @@ final class OptionTest extends TestCase {
 
 
     public function testAsStringExForUnspecifiedTrue() : void {
-        $opt = new Option( 'foo', i_bFlagOnly: false, i_bstValue: 'yup' );
+        $opt = new Option( 'foo', i_bFlagOnly: false, i_xValue: 'yup' );
         self::assertSame( 'yup', $opt->asStringEx() );
         $opt->set( true );
         self::expectException( BadOptionException::class );
