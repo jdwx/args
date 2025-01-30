@@ -64,6 +64,12 @@ if ( $st = $args->peekKeywords( $rKeywords, i_bConsume: true ) ) {
 
 ## -------------------------
 
+$args = new Arguments( 'Hello, "world!"' );
+echo 'parsed arg 1 = ', $args->shiftString(), "\n"; # Echoes "Hello,"
+echo 'parsed arg 2 = ', $args->shiftString(), "\n"; # Echoes "world!" (no quotes)
+
+## -------------------------
+
 $options = new Options( [
     new Option( 'foo' ),
     new Option( 'bar', i_xValue: true ),

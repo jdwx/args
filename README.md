@@ -31,6 +31,8 @@ but it has not been tested with them.
 
 ## Usage
 
+### General Argument Handling
+
 ```php
 <?php
 
@@ -59,8 +61,7 @@ try {
 }
 ```
 
-The default form of such methods returns null if no more arguments are present,
-which is useful for iterating in a while loop:
+The default form of such methods returns null if no more arguments are present, which is useful for iterating in a while loop:
 
 ```php
 $args = new Arguments( [ '1', '2', '3', '4', '5' ] );
@@ -69,9 +70,7 @@ while ( $i = $args->shiftInteger() ) {
 }
 ```
 
-The shift methods also provide a variant that throws an exception if no more
-arguments are present. This is useful for ensuring that a required argument is
-present:
+The shift methods also provide a variant that throws an exception if no more arguments are present. This is useful for ensuring that a required argument is present:
 
 ```php
 while ( $st = $args->shiftString() ) {
@@ -81,8 +80,7 @@ while ( $st = $args->shiftString() ) {
 }
 ```
 
-It is also possible to "peek" at the next argument without necessarily consuming it.
-This is supported for strings that match a certain prefix:
+It is also possible to "peek" at the next argument without necessarily consuming it. This is supported for strings that match a certain prefix:
 
 ```php
 
@@ -115,10 +113,21 @@ if ( $st = $args->peekKeywords( $rKeywords, i_bConsume: true ) ) {
 }
 ````
 
-The library also provides handling for optional Gnu-style arguments that begin with
-two hyphens. It supports both boolean flags (e.g., --flag and --no-flag) and options that require a value (e.g., --key=value). It does
-**not
-** support short options (e.g, "-h") or options that require a value to be specified in the next argument (e.g., "--key value").
+### Parsing Arguments From Strings
+
+While the command line is the most common place where arguments are encountered, the library also provides functionality for processing arbitrary strings into lists of arguments, including robust handling of quoting and escaped characters:
+
+```php
+$args = new Arguments( 'Hello, "world!"' );
+echo 'parsed arg 1 = ', $args->shiftString(), "\n"; # Echoes "Hello,"
+echo 'parsed arg 2 = ', $args->shiftString(), "\n"; # Echoes "world!" (no quotes)
+```
+
+The ParsedString class provides a lower-level interface for interacting with parsed strings, including $variable substitution and implementing \`backtick\` replacement through callbacks. See the parser.php file in the examples directory for a simple example.
+
+### Handling Options
+
+The library also provides handling for optional Gnu-style arguments that begin with two hyphens. It supports both boolean flags (e.g., --flag and --no-flag) and options that require a value (e.g., --key=value). It does not support short options (e.g, "-h") or options that require a value to be specified in the next argument (e.g., "--key value").
 
 ```php
 $options = new Options( [
@@ -170,12 +179,8 @@ Handling options through any of these interfaces removes them from the argument 
 
 ## Stability
 
-This library is considered stable and is used in production code. Additional parsing
-methods may be added in the future, but existing methods should not be removed or
-changed in a way that breaks backwards compatibility. Exceptions to address security
-issues or bugs may occur, but are expected to be rare.
+This library is considered stable and is used in production code. Additional parsing methods may be added in the future, but existing methods should not be removed or changed in a way that breaks backwards compatibility. Exceptions to address security issues or bugs may occur, but are expected to be rare.
 
 ## History
 
-This library has been in use for many years. It was refactored out of a larger codebase
-in 2023 and was first released as a standalone library in 2024.
+This library has been in use for many years. It was refactored out of a larger codebase in 2023 and was first released as a standalone library in 2024.
