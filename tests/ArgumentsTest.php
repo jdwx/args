@@ -8,6 +8,7 @@ use JDWX\Args\Arguments;
 use JDWX\Args\BadArgumentException;
 use JDWX\Args\ExtraArgumentsException;
 use JDWX\Args\MissingArgumentException;
+use JDWX\Args\StringParser;
 use JDWX\Param\IParameter;
 use JDWX\Param\Parse;
 use PHPUnit\Framework\TestCase;
@@ -21,6 +22,15 @@ class ArgumentsTest extends TestCase {
 
     public function testConstructFromArray() : void {
         $args = new Arguments( [ 'foo', 'bar' ] );
+        self::assertEquals( 'foo', $args->shiftString() );
+        self::assertEquals( 'bar', $args->shiftString() );
+        self::assertTrue( $args->empty() );
+    }
+
+
+    public function testConstructFromParsedString() : void {
+        $parse = StringParser::parseString( 'foo bar' );
+        $args = new Arguments( $parse );
         self::assertEquals( 'foo', $args->shiftString() );
         self::assertEquals( 'bar', $args->shiftString() );
         self::assertTrue( $args->empty() );
@@ -929,7 +939,6 @@ class ArgumentsTest extends TestCase {
         self::assertNull( $args->shiftString() );
 
         /**
-         * @noinspection PhpParamsInspection
          * @phpstan-ignore argument.type
          */
         $args = new Arguments( [ [ 'foo', 'bar' ] ] );

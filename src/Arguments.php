@@ -19,13 +19,17 @@ use TypeError;
 class Arguments extends ArgumentParser implements Countable {
 
 
+    /** @var list<string> */
     protected array $args;
 
 
-    /** @param list<string> $args */
-    public function __construct( array|string $i_args ) {
+    /** @param list<string>|string|ParsedString $i_args */
+    public function __construct( array|string|ParsedString $i_args ) {
         if ( is_string( $i_args ) ) {
-            $i_args = StringParser::parseString( $i_args )->getSegments();
+            $i_args = StringParser::parseString( $i_args );
+        }
+        if ( $i_args instanceof ParsedString ) {
+            $i_args = $i_args->getSegments();
         }
         $this->args = $i_args;
     }
