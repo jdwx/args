@@ -63,7 +63,7 @@ The default form of such methods returns null if no more arguments are present,
 which is useful for iterating in a while loop:
 
 ```php
-$args = new JDWX\Args\Arguments( [ 1, 2, 3, 4, 5 ] );
+$args = new Arguments( [ '1', '2', '3', '4', '5' ] );
 while ( $i = $args->shiftInteger() ) {
     echo "Got integer: $i\n";
 }
@@ -109,7 +109,7 @@ $rKeywords = [ 'example', 'demo', 'test' ];
 # The default is kept as false for consistency with peekString(), but usually
 # you do want to consume keyword-matching arguments.
 if ( $st = $args->peekKeywords( $rKeywords, i_bConsume: true ) ) {
-    echo "Got: $st\n";
+    echo "Keyword: {$st}\n";
 } else {
     echo "Nope!\n";
 }
@@ -127,7 +127,7 @@ $options = new Options( [
     new Option( 'baz', i_bFlagOnly: false ),
     new Option( 'qux', '1', '0' ),
 ] );
-$args = new JDWX\Args\Arguments( [ "--foo", "--no-bar", "--baz=quux", "--qux=3" ] );
+$args = new JDWX\Args\Arguments( [ '--foo', '--no-bar', '--baz=quux', '--qux=3' ] );
 $options->fromArguments( $args );
 echo 'foo = ', $options[ 'foo' ]->asBool() ? 'true' : 'false', "\n";
 echo 'bar = ', $options[ 'bar' ]->asBool() ? 'true' : 'false', "\n";
@@ -143,14 +143,22 @@ If you only have one flag, you can use the Option class directly.
 $args = new Arguments( [ "--foo=bar" ] );
 $option = new Option( 'foo', i_bFlagOnly: false );
 $option->set( $args );
-echo 'foo as bool = ', $option->asBool(), "\n"; # Echoes "true" because flag was present.
+echo 'foo as bool = ', $option->asBool() ? 'true' : 'Nope!', "\n"; # Echoes "true" because flag was present.
 echo 'foo as str = ', $option->asString(), "\n"; # Echoes "bar" in the given example.
+```
+
+If you prefer to do it in one line of code, there are static methods:
+
+```php
+$args = new Arguments( [ '--foo=bar', '--baz' ] );
+echo "1-line foo = ", Option::simpleString( 'foo', $args ), "\n"; # Echoes "bar"
+echo "1-line baz = ", Option::simpleBool( 'baz', $args ) ? 'true' : 'Nope!', "\n"; # Echoes "true"
 ```
 
 If you don't want to bother predefining options, you can also extract everything that looks like one from the arguments:
 
 ```php
-$args = new Arguments( [ "--foo=bar", "--baz", "--no-qux", "leftover" ] );
+$args = new Arguments( [ '--foo=bar', '--baz', '--no-qux', 'leftover' ] );
 $rOptions = $args->handleOptions();
 echo $rOptions[ 'foo' ], "\n"; # Echoes "bar"
 echo ( $rOptions[ 'baz' ] === true ) ? 'true' : 'Nope!', "\n"; # Echoes "true"

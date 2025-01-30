@@ -24,12 +24,12 @@ $args = new Arguments( [ 'not-an-email-address' ] );
 try {
     $email = $args->shiftEmailAddress();
 } catch ( JDWX\Args\BadArgumentException $e ) {
-    echo "Not a valid email address: ", $e->getValue(), "\n";
+    echo 'Not a valid email address: ', $e->getValue(), "\n";
 }
 
 ## -------------------------
 
-$args = new Arguments( [ 1, 2, 3, 4, 5 ] );
+$args = new Arguments( [ '1', '2', '3', '4', '5' ] );
 while ( $i = $args->shiftInteger() ) {
     echo "Got integer: $i\n";
 }
@@ -57,7 +57,7 @@ $args = new Arguments( [ 'example', 'stuff' ] );
 # The default is kept as false for consistency with peekString(), but usually
 # you do want to consume keyword-matching arguments.
 if ( $st = $args->peekKeywords( $rKeywords, i_bConsume: true ) ) {
-    echo "Got: $st\n";
+    echo "Keyword: {$st}\n";
 } else {
     echo "Nope!\n";
 }
@@ -66,11 +66,11 @@ if ( $st = $args->peekKeywords( $rKeywords, i_bConsume: true ) ) {
 
 $options = new Options( [
     new Option( 'foo' ),
-    new Option( 'bar', i_bstValue: true ),
+    new Option( 'bar', i_xValue: true ),
     new Option( 'baz', i_bFlagOnly: false ),
     new Option( 'qux', '1', '0' ),
 ] );
-$args = new Arguments( [ "--foo", "--no-bar", "--baz=quux", "--qux=3" ] );
+$args = new Arguments( [ '--foo', '--no-bar', '--baz=quux', '--qux=3' ] );
 $options->fromArguments( $args );
 echo 'foo = ', $options[ 'foo' ]->asBool() ? 'true' : 'false', "\n";
 echo 'bar = ', $options[ 'bar' ]->asBool() ? 'true' : 'false', "\n";
@@ -81,17 +81,23 @@ for ( $ii = 0 ; $ii < $options[ 'qux' ]->asInt() ; ++$ii ) {
 
 ## -------------------------
 
-$args = new Arguments( [ "--foo=bar" ] );
+$args = new Arguments( [ '--foo=bar' ] );
 $option = new Option( 'foo', i_bFlagOnly: false );
 $option->set( $args );
-echo 'foo as bool = ', $option->asBool(), "\n"; # Echoes "true" because flag was present.
+echo 'foo as bool = ', $option->asBool() ? 'true' : 'Nope!', "\n"; # Echoes "true" because flag was present.
 echo 'foo as str = ', $option->asString(), "\n"; # Echoes "bar" in the given example.
 
 ## -------------------------
 
-$args = new Arguments( [ "--foo=bar", "--baz", "--no-qux", "leftover" ] );
+$args = new Arguments( [ '--foo=bar', '--baz', '--no-qux', 'leftover' ] );
 $rOptions = $args->handleOptions();
 echo $rOptions[ 'foo' ], "\n"; # Echoes "bar"
 echo ( $rOptions[ 'baz' ] === true ) ? 'true' : 'Nope!', "\n"; # Echoes "true"
 echo ( $rOptions[ 'qux' ] === false ) ? 'false' : 'Nope!', "\n"; # Echoes "false"
 echo $args->shiftString(), "\n"; # Echoes "leftover"
+
+## -------------------------
+
+$args = new Arguments( [ '--foo=bar', '--baz' ] );
+echo '1-line foo = ', Option::simpleString( 'foo', $args ), "\n"; # Echoes "bar"
+echo '1-line baz = ', Option::simpleBool( 'baz', $args ) ? 'true' : 'Nope!', "\n"; # Echoes "true"
