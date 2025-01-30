@@ -16,30 +16,46 @@ final class OptionTest extends TestCase {
 
     public function testAsBoolean() : void {
         $opt = new Option( 'foo', i_bFlagOnly: false );
-        self::assertFalse( $opt->asBoolean() );
+        self::assertFalse( $opt->asBool() );
         $opt->set( true );
-        self::assertTrue( $opt->asBoolean() );
+        self::assertTrue( $opt->asBool() );
         $opt->set( 'true' );
-        self::assertTrue( $opt->asBoolean() );
+        self::assertTrue( $opt->asBool() );
         $opt->set( 'false' );
-        self::assertFalse( $opt->asBoolean() );
+        self::assertFalse( $opt->asBool() );
         $opt->set( 'foo' );
-        self::assertTrue( $opt->asBoolean() );
+        self::assertTrue( $opt->asBool() );
     }
 
 
     public function testAsBooleanForFlag() : void {
         $opt = new Option( 'foo', i_bFlagOnly: true );
         $opt->set( true );
-        self::assertTrue( $opt->asBoolean() );
+        self::assertTrue( $opt->asBool() );
         $opt->set( false );
-        self::assertFalse( $opt->asBoolean() );
+        self::assertFalse( $opt->asBool() );
         $opt->set( 'true' );
-        self::assertTrue( $opt->asBoolean() );
+        self::assertTrue( $opt->asBool() );
         $opt->set( 'false' );
-        self::assertFalse( $opt->asBoolean() );
+        self::assertFalse( $opt->asBool() );
         self::expectException( BadOptionException::class );
         $opt->set( 'foo' );
+    }
+
+
+    public function testAsParameterForFlag() : void {
+        $opt = new Option( 'foo', i_bFlagOnly: true );
+        self::assertFalse( $opt->asParameter()->asBool() );
+        $opt->set( true );
+        self::assertTrue( $opt->asParameter()->asBool() );
+    }
+
+
+    public function testAsParameterForValue() : void {
+        $opt = new Option( 'foo', 'bar' );
+        self::assertTrue( $opt->asParameter()->isNull() );
+        $opt->set( true );
+        self::assertSame( 'bar', $opt->asParameter()->asString() );
     }
 
 
@@ -47,7 +63,8 @@ final class OptionTest extends TestCase {
         $opt = new Option( 'foo', i_bFlagOnly: false );
         self::assertNull( $opt->asString() );
         $opt->set( 'false' );
-        self::assertNull( $opt->asString() );
+        self::assertFalse( $opt->asBool() );
+        self::assertSame( 'false', $opt->asString() );
         $opt->set( 'bar' );
         self::assertSame( 'bar', $opt->asString() );
         $opt->set( true );
@@ -96,15 +113,15 @@ final class OptionTest extends TestCase {
         $opt = new Option( 'foo' );
         $args = new Arguments( [ '--foo' ] );
         $opt->set( $args );
-        self::assertTrue( $opt->asBoolean() );
+        self::assertTrue( $opt->asBool() );
 
         $args = new Arguments( [ '--foo', '--no-foo' ] );
         $opt->set( $args );
-        self::assertFalse( $opt->asBoolean() );
+        self::assertFalse( $opt->asBool() );
 
         $args = new Arguments( [ '--foo', '--', '--no-foo' ] );
         $opt->set( $args );
-        self::assertTrue( $opt->asBoolean() );
+        self::assertTrue( $opt->asBool() );
     }
 
 
@@ -117,8 +134,8 @@ final class OptionTest extends TestCase {
 
 
     public function testSetForArgumentsWithValue() : void {
-        $opt = new Option( 'foo', bstValueOnTrue: 'bar' );
-        self::assertFalse( $opt->asBoolean() );
+        $opt = new Option( 'foo', 'bar' );
+        self::assertFalse( $opt->asBool() );
         self::assertNull( $opt->asString() );
         $args = new Arguments( [ '--foo' ] );
         $opt->set( $args );

@@ -17,55 +17,45 @@ use LogicException;
 class Option {
 
 
-    private string|bool $bstValue = false;
+    private ?string $nstValue;
 
-    private bool $bFlagOnly;
+    private bool $bValue;
+
+    private readonly bool $bFlagOnly;
 
 
-    public function __construct( private readonly string      $stName,
-                                 private readonly bool|string $bstValueOnTrue = true,
-                                 private readonly bool|string $bstValueOnFalse = false,
-                                 ?bool                        $i_bFlagOnly = null,
-                                 bool|string                  $i_bstValue = false ) {
+    public function __construct( private readonly string  $stName,
+                                 private readonly ?string $nstValueOnTrue = null,
+                                 private readonly ?string $nstValueOnFalse = null,
+                                 ?bool                    $i_bFlagOnly = null,
+                                 bool|string              $i_bstValue = false ) {
         $this->bFlagOnly = $i_bFlagOnly ??
-            ( $bstValueOnTrue === true && $bstValueOnFalse === false && is_bool( $i_bstValue ) );
+            ( is_null( $nstValueOnTrue ) && is_null( $nstValueOnFalse ) && is_bool( $i_bstValue ) );
         $this->set( $i_bstValue );
     }
 
 
-    public function asBoolean() : bool {
-        if ( is_bool( $this->bstValue ) ) {
-            return $this->bstValue;
-        }
-        try {
-            return Parse::bool( $this->bstValue );
-        } catch ( ParseException ) {
-            assert( ! $this->bFlagOnly );
-            # Values that don't parse as boolean are assumed to be true.
-            # (If we were in flag mode, we would have thrown an exception
-            # when the value was set.)
-            return true;
-        }
+    public function asBool() : bool {
+        return $this->bValue;
     }
 
 
     public function asParameter() : IParameter {
-        return new Parameter( $this->bstValue );
+        if ( $this->bFlagOnly ) {
+            return new Parameter( $this->bValue );
+        }
+        return new Parameter( $this->nstValue );
     }
 
 
     public function asString() : ?string {
         if ( $this->bFlagOnly ) {
-            throw new LogicException( 'asString() called on flag ' . $this->stName );
+            throw new LogicException( 'Option --' . $this->stName . ' cannot not have a value.' );
         }
-        if ( is_string( $this->bstValue ) ) {
-            return $this->bstValue;
+        if ( $this->bValue && is_null( $this->nstValue ) ) {
+            throw new BadOptionException( $this->stName, 'Option --' . $this->stName . ' requires a value.' );
         }
-        if ( false === $this->bstValue ) {
-            return null;
-        }
-        assert( true === $this->bstValueOnTrue );
-        throw new BadOptionException( $this->stName, 'Option --' . $this->stName . ' requires a value.' );
+        return $this->nstValue;
     }
 
 
@@ -94,12 +84,14 @@ class Option {
         }
 
         if ( true === $i_bstValue ) {
-            $this->bstValue = $this->bstValueOnTrue;
+            $this->bValue = true;
+            $this->nstValue = $this->nstValueOnTrue;
             return;
         }
 
         if ( false === $i_bstValue ) {
-            $this->bstValue = $this->bstValueOnFalse;
+            $this->bValue = false;
+            $this->nstValue = $this->nstValueOnFalse;
             return;
         }
 
@@ -114,29 +106,16 @@ class Option {
             // Do nothing.
         }
 
-        if ( $this->bFlagOnly ) {
-            if ( null === $nbParsedBool ) {
+        if ( null === $nbParsedBool ) {
+            if ( $this->bFlagOnly ) {
                 throw new BadOptionException( $this->stName, 'Option ' . $this->stName . ' does not accept a value.' );
             }
-            if ( true === $nbParsedBool ) {
-                $this->bstValue = $this->bstValueOnTrue;
-            } else {
-                $this->bstValue = $this->bstValueOnFalse;
-            }
-            return;
+            $nbParsedBool = true;
         }
 
-        if ( null === $nbParsedBool ) {
-            $this->bstValue = $i_bstValue;
-            return;
-        }
+        $this->bValue = $nbParsedBool;
+        $this->nstValue = $i_bstValue;
 
-        if ( true === $nbParsedBool ) {
-            $this->bstValue = $this->bstValueOnTrue;
-            return;
-        }
-
-        $this->bstValue = $this->bstValueOnFalse;
     }
 
 
