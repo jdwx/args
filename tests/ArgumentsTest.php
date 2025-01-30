@@ -19,6 +19,22 @@ class ArgumentsTest extends TestCase {
     private ?string $tmpFile = null;
 
 
+    public function testConstructFromArray() : void {
+        $args = new Arguments( [ 'foo', 'bar' ] );
+        self::assertEquals( 'foo', $args->shiftString() );
+        self::assertEquals( 'bar', $args->shiftString() );
+        self::assertTrue( $args->empty() );
+    }
+
+
+    public function testConstructFromString() : void {
+        $args = new Arguments( 'foo bar' );
+        self::assertEquals( 'foo', $args->shiftString() );
+        self::assertEquals( 'bar', $args->shiftString() );
+        self::assertTrue( $args->empty() );
+    }
+
+
     public function testCopy() : void {
         $args = new Arguments( [ 'foo', 'bar' ] );
         $args2 = $args->copy();
