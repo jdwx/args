@@ -37,7 +37,7 @@ class ParsedString implements Countable {
     }
 
 
-    public function addSpace( string $i_ch = " " ) : void {
+    public function addSpace( string $i_ch = ' ' ) : void {
         $this->addSegment( Segment::DELIMITER, $i_ch );
     }
 
@@ -87,7 +87,7 @@ class ParsedString implements Countable {
             }
             $rOut[] = $seg->getOriginal();
         }
-        return implode( "", $rOut );
+        return implode( '', $rOut );
     }
 
 
@@ -99,7 +99,7 @@ class ParsedString implements Countable {
      * This method is mainly helpful for debugging and testing.
      */
     public function getProcessed() : string {
-        $st = "";
+        $st = '';
         foreach ( $this->rSegments as $seg ) {
             $st .= $seg->getProcessed();
         }
@@ -126,19 +126,19 @@ class ParsedString implements Countable {
      * @return string[] An array of individual arguments.
      */
     public function getSegments( bool $i_bIncludeQuotes = false ) : array {
-        $st = "";
+        $st = '';
         $rOut = [];
         foreach ( $this->rSegments as $seg ) {
             if ( $seg->isDelimiter() ) {
-                if ( $st !== "" ) {
+                if ( $st !== '' ) {
                     $rOut[] = $st;
-                    $st = "";
+                    $st = '';
                 }
                 continue;
             }
             $st .= $seg->getProcessed( $i_bIncludeQuotes );
         }
-        if ( $st !== "" ) {
+        if ( $st !== '' ) {
             $rOut[] = $st;
         }
         return $rOut;
@@ -171,7 +171,7 @@ class ParsedString implements Countable {
 
 
     private function addSegment( Segment $i_type, string $i_text ) : void {
-        if ( "" === $i_text ) {
+        if ( '' === $i_text ) {
             return;
         }
         $this->rSegments[] = new ParsedSegment( $i_type, $i_text );

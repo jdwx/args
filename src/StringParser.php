@@ -16,7 +16,7 @@ class StringParser {
     public static function parseString( string $i_stLine, bool $i_bSingleQuotes = true,
                                         bool   $i_bDoubleQuotes = true,
                                         bool   $i_bBackquotes = true ) : ParsedString|string {
-        $st = trim( preg_replace( "/\s\s+/", " ", $i_stLine ) );
+        $st = trim( preg_replace( '/\s\s+/', ' ', $i_stLine ) );
         $pln = new ParsedString();
         $stQuoteChars = ' \\#';
         if ( $i_bDoubleQuotes ) {
@@ -28,13 +28,13 @@ class StringParser {
         if ( $i_bBackquotes ) {
             $stQuoteChars .= '`';
         }
-        while ( $st !== "" ) {
+        while ( $st !== '' ) {
             $iSpan = strcspn( $st, $stQuoteChars );
             $stUnquoted = substr( $st, 0, $iSpan );
             $pln->addUnquoted( $stUnquoted );
             $ch = substr( $st, $iSpan, 1 );
             $stRest = substr( $st, $iSpan + 1 );
-            if ( "" === $ch ) {
+            if ( '' === $ch ) {
                 # Everything remaining was unquoted.
                 return $pln;
             } elseif ( ' ' === $ch ) {
@@ -53,19 +53,19 @@ class StringParser {
                 }
                 $pln->addSingleQuoted( $r[ 0 ] );
                 $stRest = $r[ 1 ];
-            } elseif ( "`" === $ch ) {
+            } elseif ( '`' === $ch ) {
                 $r = self::parseQuote( $stRest, '`' );
                 if ( is_string( $r ) ) {
                     return $r;
                 }
                 $pln->addBackQuoted( $r[ 0 ] );
                 $stRest = $r[ 1 ];
-            } elseif ( "#" === $ch ) {
+            } elseif ( '#' === $ch ) {
                 $pln->addComment( $stRest );
                 break;
             } elseif ( "\\" === $ch ) {
-                if ( "" === $stRest ) {
-                    return "Hanging backslash.";
+                if ( '' === $stRest ) {
+                    return 'Hanging backslash.';
                 }
                 if ( preg_match( '/[uU][0-9a-fA-F]{4}/', $stRest ) ) {
                     $stNext = substr( $stRest, 0, 5 );
@@ -93,7 +93,7 @@ class StringParser {
      *                      containing [ quoted-text, everything-after ]
      */
     protected static function parseQuote( string $i_st, string $i_stQuoteCharacter ) : array|string {
-        $stOut = "";
+        $stOut = '';
         $stRest = $i_st;
         while ( true ) {
             $iSpan = strpos( $stRest, $i_stQuoteCharacter );

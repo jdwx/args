@@ -68,17 +68,17 @@ class StringParserTest extends TestCase {
 
 
     public function testParseStringForBackQuotes() : void {
-        $x = StringParser::parseString( "`foo` bar" );
+        $x = StringParser::parseString( '`foo` bar' );
         self::assertInstanceOf( ParsedString::class, $x );
         self::assertCount( 3, $x );
         self::assertSame( 'foo', $x->getSegment( 0 )->getProcessed() );
         self::assertSame( ' ', $x->getSegment( 1 )->getProcessed() );
         self::assertSame( 'bar', $x->getSegment( 2 )->getProcessed() );
 
-        $x = StringParser::parseString( "`foo` bar", i_bBackquotes: false );
+        $x = StringParser::parseString( '`foo` bar', i_bBackquotes: false );
         self::assertInstanceOf( ParsedString::class, $x );
         self::assertCount( 3, $x );
-        self::assertSame( "`foo`", $x->getSegment( 0 )->getProcessed() );
+        self::assertSame( '`foo`', $x->getSegment( 0 )->getProcessed() );
         self::assertSame( ' ', $x->getSegment( 1 )->getProcessed() );
         self::assertSame( 'bar', $x->getSegment( 2 )->getProcessed() );
     }

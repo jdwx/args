@@ -1,6 +1,9 @@
 <?php /** @noinspection PhpMethodNamingConventionInspection */
 
 
+declare( strict_types = 1 );
+
+
 use JDWX\Args\Arguments;
 use JDWX\Args\BadArgumentException;
 use JDWX\Args\ExtraArgumentsException;
@@ -297,9 +300,9 @@ class ArgumentsTest extends TestCase {
         $args = new Arguments( [ 'Hello', 'world!' ] );
         self::assertNull( $args->peekString( 'foo' ) );
         self::assertEquals( 'Hello', $args->peekString() );
-        self::assertSame( "", $args->peekString( "Hello", true ) );
+        self::assertSame( '', $args->peekString( 'Hello', true ) );
         self::assertEquals( 'world!', $args->peekString() );
-        self::assertSame( "", $args->peekString( "world!", true ) );
+        self::assertSame( '', $args->peekString( 'world!', true ) );
         self::assertNull( $args->peekString() );
         self::expectException( LogicException::class );
         $args->peekString( null, true );

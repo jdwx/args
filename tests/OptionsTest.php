@@ -6,6 +6,7 @@ declare( strict_types = 1 );
 
 use JDWX\Args\Arguments;
 use JDWX\Args\ExtraOptionsException;
+use JDWX\Args\MissingOptionException;
 use JDWX\Args\Option;
 use JDWX\Args\Options;
 use PHPUnit\Framework\TestCase;
@@ -15,7 +16,7 @@ final class OptionsTest extends TestCase {
 
 
     public function testAdd() : void {
-        $opt = new Option( 'foo', i_bstValue: 'bar' );
+        $opt = new Option( 'foo', i_xValue: 'bar' );
         $options = new Options();
         $options->add( $opt );
         self::assertSame( 'bar', $options[ 'foo' ]->asString() );
@@ -24,8 +25,8 @@ final class OptionsTest extends TestCase {
 
     public function testFromArguments() : void {
         $options = new Options( [
-            new Option( 'foo', i_bstValue: 'bar' ),
-            new Option( 'baz', i_bstValue: 'qux' ),
+            new Option( 'foo', i_xValue: 'bar' ),
+            new Option( 'baz', i_xValue: 'qux' ),
         ] );
         $args = new Arguments( [ '--foo=quux', '--baz=corge', ] );
         $options->fromArguments( $args );
@@ -36,8 +37,8 @@ final class OptionsTest extends TestCase {
 
     public function testFromArgumentsForExtraOptions() : void {
         $options = new Options( [
-            new Option( 'foo', i_bstValue: 'bar' ),
-            new Option( 'baz', i_bstValue: 'qux' ),
+            new Option( 'foo', i_xValue: 'bar' ),
+            new Option( 'baz', i_xValue: 'qux' ),
         ] );
         $args = new Arguments( [ '--foo=quux', '--baz=corge', '--grault=garply' ] );
         self::expectException( ExtraOptionsException::class );
@@ -47,8 +48,8 @@ final class OptionsTest extends TestCase {
 
     public function testFromArgumentsForStopper() : void {
         $options = new Options( [
-            new Option( 'foo', i_bstValue: 'bar' ),
-            new Option( 'baz', i_bstValue: 'qux' ),
+            new Option( 'foo', i_xValue: 'bar' ),
+            new Option( 'baz', i_xValue: 'qux' ),
         ] );
         $args = new Arguments( [ '--foo=quux', '--', '--baz=corge' ] );
         $options->fromArguments( $args );
@@ -78,7 +79,7 @@ final class OptionsTest extends TestCase {
 
 
     public function testOffsetGet() : void {
-        $opt = new Option( 'foo', i_bstValue: 'bar' );
+        $opt = new Option( 'foo', i_xValue: 'bar' );
         $options = new Options( [ $opt ] );
         self::assertSame( 'bar', $options[ 'foo' ]->asString() );
     }
@@ -102,11 +103,32 @@ final class OptionsTest extends TestCase {
 
 
     public function testOffsetUnset() : void {
-        $opt = new Option( 'foo', i_bstValue: 'bar' );
+        $opt = new Option( 'foo', i_xValue: 'bar' );
         $options = new Options( [ $opt ] );
         self::assertSame( 'bar', $options[ 'foo' ]->asString() );
         unset( $options[ 'foo' ] );
         self::assertNull( $opt->asString() );
+    }
+
+
+    public function testSimpleBool() : void {
+        self::assertTrue( Option::simpleBool( 'foo', 'yes' ) );
+        self::assertFalse( Option::simpleBool( 'foo', 'no' ) );
+        $args = new Arguments( [ '--no-foo' ] );
+        self::assertFalse( Option::simpleBool( 'foo', $args ) );
+    }
+
+
+    public function testSimpleString() : void {
+        self::assertSame( 'bar', Option::simpleString( 'foo', 'bar' ) );
+    }
+
+
+    public function testSimpleStringEx() : void {
+        self::assertSame( 'bar', Option::simpleStringEx( 'foo', 'bar' ) );
+        self::expectException( MissingOptionException::class );
+        $args = new Arguments( [] );
+        Option::simpleStringEx( 'foo', $args );
     }
 
 

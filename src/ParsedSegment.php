@@ -33,8 +33,8 @@ class ParsedSegment {
         $st = str_replace( "\\v", "\v", $st );
         $st = str_replace( "\\e", "\e", $st );
         $st = str_replace( "\\f", "\f", $st );
-        $st = str_replace( "\\a", "\a", $st );
-        $st = str_replace( "\\b", "\b", $st );
+        $st = str_replace( "\\a", '\a', $st );
+        $st = str_replace( "\\b", '\b', $st );
         $st = str_replace( "\\0", "\0", $st );
 
         # Handle octal escape sequences.
@@ -56,9 +56,9 @@ class ParsedSegment {
     /** @return array<string, string|Segment> */
     public function debug() : array {
         return [
-            "type" => $this->type,
-            "textOriginal" => $this->getOriginal(),
-            "textProcessed" => $this->getProcessed(),
+            'type' => $this->type,
+            'textOriginal' => $this->getOriginal(),
+            'textProcessed' => $this->getProcessed(),
         ];
     }
 
@@ -68,8 +68,8 @@ class ParsedSegment {
             Segment::DELIMITER, Segment::UNQUOTED => $this->textOriginal,
             Segment::SINGLE_QUOTED => "'" . $this->textOriginal . "'",
             Segment::DOUBLE_QUOTED => '"' . $this->textOriginal . '"',
-            Segment::BACK_QUOTED => "`" . $this->textOriginal . "`",
-            Segment::COMMENT => $i_bIncludeComments ? "#" . $this->textOriginal : "",
+            Segment::BACK_QUOTED => '`' . $this->textOriginal . '`',
+            Segment::COMMENT => $i_bIncludeComments ? '#' . $this->textOriginal : '',
         };
     }
 
@@ -78,7 +78,7 @@ class ParsedSegment {
         $txt = match ( $this->type ) {
             Segment::DELIMITER, Segment::SINGLE_QUOTED, Segment::BACK_QUOTED => $this->textProcessed,
             Segment::UNQUOTED, Segment::DOUBLE_QUOTED => self::substEscapeSequences( $this->textProcessed ),
-            Segment::COMMENT => "",
+            Segment::COMMENT => '',
         };
         if ( $i_bIncludeQuotes ) {
             if ( Segment::SINGLE_QUOTED === $this->type ) {
@@ -86,7 +86,7 @@ class ParsedSegment {
             } elseif ( Segment::DOUBLE_QUOTED === $this->type ) {
                 $txt = '"' . $txt . '"';
             } elseif ( Segment::BACK_QUOTED === $this->type ) {
-                $txt = "`" . $txt . "`";
+                $txt = '`' . $txt . '`';
             }
         }
         return $txt;
@@ -134,12 +134,12 @@ class ParsedSegment {
         $st = preg_replace_callback( '/\$([a-zA-Z_][a-zA-Z0-9_]*)/', function ( $matches ) use ( &$i_rVariables, &$bst ) {
             /** @phpstan-ignore notIdentical.alwaysTrue */
             if ( true !== $bst ) {
-                return "";
+                return '';
             }
             /** @phpstan-ignore deadCode.unreachable */
             $stVar = $matches[ 1 ];
             $uMaxMatch = 0;
-            $stSubst = "";
+            $stSubst = '';
             foreach ( $i_rVariables as $key => $value ) {
                 if ( ! str_starts_with( $stVar, $key ) ) {
                     continue;
@@ -195,7 +195,7 @@ class ParsedSegment {
         $matches = [];
         preg_match( '/\$\{([a-zA-Z_][a-zA-Z0-9_]*)/', $st, $matches );
         if ( count( $matches ) > 0 ) {
-            return "Unmatched brace in variable substitution";
+            return 'Unmatched brace in variable substitution';
         }
 
         $this->textProcessed = $st;

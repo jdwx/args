@@ -70,7 +70,7 @@ class ArgumentParser {
     public static function parseFloat( string $i_st, float $i_fMin = -PHP_FLOAT_MAX,
                                        float  $i_fMax = PHP_FLOAT_MAX ) : float {
         if ( ! is_numeric( $i_st ) ) {
-            throw new BadArgumentException( $i_st, "Invalid integer" );
+            throw new BadArgumentException( $i_st, 'Invalid integer' );
         }
         try {
             return Parse::floatRangeHalfClosed( $i_st, $i_fMin, $i_fMax );
@@ -133,7 +133,7 @@ class ArgumentParser {
     /** @deprecated Retain until 1.2.0. Migrate to Parse in jdwx_param. */
     public static function parseInteger( string $i_st, int $i_iMin = PHP_INT_MIN, int $i_iMax = PHP_INT_MAX ) : int {
         if ( ! is_numeric( $i_st ) ) {
-            throw new BadArgumentException( $i_st, "Invalid integer" );
+            throw new BadArgumentException( $i_st, 'Invalid integer' );
         }
         try {
             return Parse::intRangeOpen( $i_st, $i_iMin, $i_iMax );
