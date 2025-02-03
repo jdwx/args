@@ -152,16 +152,45 @@ final class OptionTest extends TestCase {
         self::assertFalse( Option::simpleBool( 'foo', 'no' ) );
         $args = new Arguments( [ '--no-foo' ] );
         self::assertFalse( Option::simpleBool( 'foo', $args ) );
+        $args = new Arguments( [ '--foo' ] );
+        self::assertTrue( Option::simpleBool( 'foo', $args ) );
+    }
+
+
+    public function testSimpleInt() : void {
+        self::assertSame( 42, Option::simpleInt( 'foo', '42' ) );
+        $args = new Arguments( [ 'bar', 'baz', 'qux' ] );
+        self::assertNull( Option::simpleInt( 'foo', $args ) );
+        self::assertSame( 42, Option::simpleInt( 'foo', true, 42 ) );
+        self::assertSame( 42, Option::simpleInt( 'foo', false, 21, 42 ) );
+        self::assertSame( 21, Option::simpleInt( 'foo', true, 21, 42 ) );
+    }
+
+
+    public function testSimpleIntEx() : void {
+        self::assertSame( 42, Option::simpleIntEx( 'foo', '42' ) );
+        self::assertSame( 42, Option::simpleIntEx( 'foo', true, 42 ) );
+        self::assertSame( 42, Option::simpleIntEx( 'foo', false, 21, 42 ) );
+        $args = new Arguments( [ 'bar', 'baz', 'qux' ] );
+        self::expectException( MissingOptionException::class );
+        Option::simpleIntEx( 'foo', $args );
     }
 
 
     public function testSimpleString() : void {
         self::assertSame( 'bar', Option::simpleString( 'foo', 'bar' ) );
+        self::assertNull( Option::simpleString( 'foo', false ) );
+        self::assertSame( 'bar', Option::simpleString( 'foo', true, 'bar' ) );
+        self::assertSame( 'baz', Option::simpleString( 'foo', false, 'bar', 'baz' ) );
+        self::expectException( BadOptionException::class );
+        self::assertNull( Option::simpleString( 'foo', true ) );
     }
 
 
     public function testSimpleStringEx() : void {
         self::assertSame( 'bar', Option::simpleStringEx( 'foo', 'bar' ) );
+        self::assertSame( 'bar', Option::simpleStringEx( 'foo', true, 'bar' ) );
+        self::assertSame( 'baz', Option::simpleStringEx( 'foo', false, 'bar', 'baz' ) );
         self::expectException( MissingOptionException::class );
         $args = new Arguments( [] );
         Option::simpleStringEx( 'foo', $args );
