@@ -6,7 +6,6 @@ declare( strict_types = 1 );
 
 use JDWX\Args\Arguments;
 use JDWX\Args\ExtraOptionsException;
-use JDWX\Args\MissingOptionException;
 use JDWX\Args\Option;
 use JDWX\Args\Options;
 use PHPUnit\Framework\TestCase;
@@ -108,27 +107,6 @@ final class OptionsTest extends TestCase {
         self::assertSame( 'bar', $options[ 'foo' ]->asString() );
         unset( $options[ 'foo' ] );
         self::assertNull( $opt->asString() );
-    }
-
-
-    public function testSimpleBool() : void {
-        self::assertTrue( Option::simpleBool( 'foo', 'yes' ) );
-        self::assertFalse( Option::simpleBool( 'foo', 'no' ) );
-        $args = new Arguments( [ '--no-foo' ] );
-        self::assertFalse( Option::simpleBool( 'foo', $args ) );
-    }
-
-
-    public function testSimpleString() : void {
-        self::assertSame( 'bar', Option::simpleString( 'foo', 'bar' ) );
-    }
-
-
-    public function testSimpleStringEx() : void {
-        self::assertSame( 'bar', Option::simpleStringEx( 'foo', 'bar' ) );
-        self::expectException( MissingOptionException::class );
-        $args = new Arguments( [] );
-        Option::simpleStringEx( 'foo', $args );
     }
 
 

@@ -147,4 +147,25 @@ final class OptionTest extends TestCase {
     }
 
 
+    public function testSimpleBool() : void {
+        self::assertTrue( Option::simpleBool( 'foo', 'yes' ) );
+        self::assertFalse( Option::simpleBool( 'foo', 'no' ) );
+        $args = new Arguments( [ '--no-foo' ] );
+        self::assertFalse( Option::simpleBool( 'foo', $args ) );
+    }
+
+
+    public function testSimpleString() : void {
+        self::assertSame( 'bar', Option::simpleString( 'foo', 'bar' ) );
+    }
+
+
+    public function testSimpleStringEx() : void {
+        self::assertSame( 'bar', Option::simpleStringEx( 'foo', 'bar' ) );
+        self::expectException( MissingOptionException::class );
+        $args = new Arguments( [] );
+        Option::simpleStringEx( 'foo', $args );
+    }
+
+
 }
