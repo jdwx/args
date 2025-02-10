@@ -147,6 +147,42 @@ final class OptionTest extends TestCase {
     }
 
 
+    public function testSimpleArrayForArguments() : void {
+        $args = new Arguments( [ '--foo=bar', '--foo=baz', '--foo=qux' ] );
+        $rFoo = Option::simpleArray( 'foo', $args );
+        self::assertCount( 3, $rFoo );
+        self::assertContains( 'bar', $rFoo );
+        self::assertContains( 'baz', $rFoo );
+        self::assertContains( 'qux', $rFoo );
+    }
+
+
+    public function testSimpleArrayForArgumentsWithMissingOption() : void {
+        $args = new Arguments( [ '--baz=qux' ] );
+        $rFoo = Option::simpleArray( 'foo', $args, false );
+        self::assertCount( 0, $rFoo );
+        self::expectException( MissingOptionException::class );
+        Option::simpleArray( 'foo', $args );
+    }
+
+
+    public function testSimpleArrayForArray() : void {
+        $rFoo = Option::simpleArray( 'foo', [ 'bar', 'baz', 'qux' ] );
+        self::assertCount( 3, $rFoo );
+        self::assertContains( 'bar', $rFoo );
+        self::assertContains( 'baz', $rFoo );
+        self::assertContains( 'qux', $rFoo );
+    }
+
+
+    public function testSimpleArrayForArrayWithMissingOption() : void {
+        $rFoo = Option::simpleArray( 'foo', [], false );
+        self::assertCount( 0, $rFoo );
+        self::expectException( MissingOptionException::class );
+        Option::simpleArray( 'foo', [] );
+    }
+
+
     public function testSimpleBool() : void {
         self::assertTrue( Option::simpleBool( 'foo', 'yes' ) );
         self::assertFalse( Option::simpleBool( 'foo', 'no' ) );
