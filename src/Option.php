@@ -58,16 +58,40 @@ class Option {
     }
 
 
+    public static function simpleInt( string $i_stName, Arguments|bool|string $i_xValue,
+                                      ?int   $i_niValueOnTrue = null, ?int $i_niValueOnFalse = null ) : ?int {
+        $nstValueOnTrue = is_int( $i_niValueOnTrue ) ? strval( $i_niValueOnTrue ) : null;
+        $nstValueOnFalse = is_int( $i_niValueOnFalse ) ? strval( $i_niValueOnFalse ) : null;
+        $nst = static::simpleString( $i_stName, $i_xValue, $nstValueOnTrue, $nstValueOnFalse );
+        if ( is_string( $nst ) ) {
+            return Parse::int( $nst );
+        }
+        return null;
+    }
+
+
+    public static function simpleIntEx( string $i_stName, Arguments|bool|string $i_xValue,
+                                        ?int   $i_niValueOnTrue = null, ?int $i_niValueOnFalse = null ) : int {
+        $ni = static::simpleInt( $i_stName, $i_xValue, $i_niValueOnTrue, $i_niValueOnFalse );
+        if ( is_int( $ni ) ) {
+            return $ni;
+        }
+        throw new MissingOptionException( 'Option --' . $i_stName . ' is required.' );
+    }
+
+
     public static function simpleString( string  $i_stName, Arguments|bool|string $i_xValue,
-                                         ?string $i_nstValueOnTrue = null ) : ?string {
-        $opt = new Option( $i_stName, $i_nstValueOnTrue, i_bFlagOnly: false, i_xValue: $i_xValue );
+                                         ?string $i_nstValueOnTrue = null,
+                                         ?string $i_nstValueOnFalse = null ) : ?string {
+        $opt = new Option( $i_stName, $i_nstValueOnTrue, $i_nstValueOnFalse, false, $i_xValue );
         return $opt->asString();
     }
 
 
     public static function simpleStringEx( string  $i_stName, Arguments|bool|string $i_xValue,
-                                           ?string $i_nstValueOnTrue = null ) : string {
-        $nst = static::simpleString( $i_stName, $i_xValue, $i_nstValueOnTrue );
+                                           ?string $i_nstValueOnTrue = null,
+                                           ?string $i_nstValueOnFalse = null ) : string {
+        $nst = static::simpleString( $i_stName, $i_xValue, $i_nstValueOnTrue, $i_nstValueOnFalse );
         if ( is_string( $nst ) ) {
             return $nst;
         }
