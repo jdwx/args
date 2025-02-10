@@ -20,6 +20,20 @@ class ArgumentsTest extends TestCase {
     private ?string $tmpFile = null;
 
 
+    public function testCollectOption() : void {
+        $args = new Arguments( [ '--foo=bar', '--foo=baz', '--quux=corge', '--foo=qux', 'grault' ] );
+        $r = $args->collectOption( 'foo' );
+        self::assertCount( 3, $r );
+        self::assertContains( 'bar', $r );
+        self::assertContains( 'baz', $r );
+        self::assertContains( 'qux', $r );
+        $x = $args->endWithArray();
+        self::assertCount( 2, $x );
+        self::assertContains( '--quux=corge', $x );
+        self::assertContains( 'grault', $x );
+    }
+
+
     public function testConstructFromArray() : void {
         $args = new Arguments( [ 'foo', 'bar' ] );
         self::assertEquals( 'foo', $args->shiftString() );

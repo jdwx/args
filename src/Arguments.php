@@ -47,6 +47,31 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
+     * Support options that can be specified more than once. (Standard
+     * options take the last value assigned.) Returns an array of
+     * all values specified for the option.  The relevent arguments
+     * are removed from the argument list.
+     *
+     * @param string $i_stName
+     * @return array<string>
+     */
+    public function collectOption( string $i_stName ) : array {
+        $rOptions = [];
+        $stOption = '--' . $i_stName . '=';
+        $rNewArgs = [];
+        foreach ( $this->args as $stArg ) {
+            if ( ! str_starts_with( $stArg, $stOption ) ) {
+                $rNewArgs[] = $stArg;
+                continue;
+            }
+            $rOptions[] = substr( $stArg, strlen( $stOption ) );
+        }
+        $this->args = $rNewArgs;
+        return $rOptions;
+    }
+
+
+    /**
      * You need to overload this in child classes or else it
      * will copy the wrong class!
      */
