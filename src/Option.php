@@ -35,6 +35,23 @@ class Option {
     }
 
 
+    /**
+     * This doesn't work like the other simple methods because Option does
+     * not natively support arrays.
+     */
+    public static function simpleArray( string $i_stName, Arguments|array $i_xValue,
+                                        bool   $i_bRequired = true ) : array {
+        if ( $i_xValue instanceof Arguments ) {
+            $i_xValue = $i_xValue->collectOption( $i_stName );
+        }
+        assert( is_array( $i_xValue ) );
+        if ( count( $i_xValue ) > 0 || ! $i_bRequired ) {
+            return $i_xValue;
+        }
+        throw new MissingOptionException( 'Option --' . $i_stName . ' is required.' );
+    }
+
+
     public static function simpleBool( string $i_stName, Arguments|bool|string $i_xValue ) : bool {
         $opt = new Option( $i_stName, i_bFlagOnly: true, i_xValue: $i_xValue );
         return $opt->asBool();
