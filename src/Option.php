@@ -38,13 +38,17 @@ class Option {
     /**
      * This doesn't work like the other simple methods because Option does
      * not natively support arrays.
+     *
+     * @param string $i_stName The name of the option.
+     * @param Arguments|list<string> $i_xValue An argument list or list of already-found matching values.
+     * @param bool $i_bRequired Whether at least one value is required.
+     * @return list<string> The list of matching values.
      */
     public static function simpleArray( string $i_stName, Arguments|array $i_xValue,
                                         bool   $i_bRequired = true ) : array {
         if ( $i_xValue instanceof Arguments ) {
             $i_xValue = $i_xValue->collectOption( $i_stName );
         }
-        assert( is_array( $i_xValue ) );
         if ( count( $i_xValue ) > 0 || ! $i_bRequired ) {
             return $i_xValue;
         }
