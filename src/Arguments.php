@@ -49,11 +49,11 @@ class Arguments extends ArgumentParser implements Countable {
     /**
      * Support options that can be specified more than once. (Standard
      * options take the last value assigned.) Returns an array of
-     * all values specified for the option.  The relevent arguments
+     * all values specified for the option.  The relevant arguments
      * are removed from the argument list.
      *
      * @param string $i_stName
-     * @return array<string>
+     * @return list<string>
      */
     public function collectOption( string $i_stName ) : array {
         $rOptions = [];
