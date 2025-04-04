@@ -465,7 +465,7 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftCurrencyEx( string $i_nstRequired = null ) : int {
+    public function shiftCurrencyEx( ?string $i_nstRequired = null ) : int {
         $ni = $this->shiftCurrency();
         if ( is_int( $ni ) ) {
             return $ni;
@@ -484,7 +484,7 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftEmailAddressEx( string $i_nstRequired = null ) : string {
+    public function shiftEmailAddressEx( ?string $i_nstRequired = null ) : string {
         $nst = $this->shiftEmailAddress();
         if ( is_string( $nst ) ) {
             return $nst;
@@ -512,7 +512,7 @@ class Arguments extends ArgumentParser implements Countable {
     }
 
 
-    public function shiftExistingDirectoryEx( string $i_nstRequired = null ) : string {
+    public function shiftExistingDirectoryEx( ?string $i_nstRequired = null ) : string {
         $nst = $this->shiftExistingDirectory();
         if ( is_string( $nst ) ) {
             return $nst;
