@@ -4,7 +4,7 @@
 declare( strict_types = 1 );
 
 
-namespace JDWX\Args;
+namespace JDWX\Args\Exceptions;
 
 
 use JDWX\Param\IParameter;
@@ -24,8 +24,11 @@ class BadArgumentException extends ArgumentException {
             $message = $previous->getMessage();
             $code = $previous->getCode();
         }
-        parent::__construct( $message, $code, $previous );
-        $this->value = $i_value instanceof IParameter ? json_encode( $i_value ) : $i_value;
+        /** @noinspection PhpCastIsUnnecessaryInspection */
+        parent::__construct( $message, intval( $code ), $previous );
+        $this->value = strval( $i_value instanceof IParameter
+            ? json_encode( $i_value, JSON_THROW_ON_ERROR )
+            : $i_value );
     }
 
 

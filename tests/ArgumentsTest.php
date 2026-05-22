@@ -5,16 +5,18 @@ declare( strict_types = 1 );
 
 
 use JDWX\Args\Arguments;
-use JDWX\Args\BadArgumentException;
-use JDWX\Args\ExtraArgumentsException;
-use JDWX\Args\MissingArgumentException;
-use JDWX\Args\StringParser;
+use JDWX\Args\Exceptions\BadArgumentException;
+use JDWX\Args\Exceptions\ExtraArgumentsException;
+use JDWX\Args\Exceptions\MissingArgumentException;
 use JDWX\Param\IParameter;
 use JDWX\Param\Parse;
+use JDWX\Strict\OK;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 
-class ArgumentsTest extends TestCase {
+#[CoversClass( Arguments::class )]
+final class ArgumentsTest extends TestCase {
 
 
     private ?string $tmpFile = null;
@@ -43,8 +45,7 @@ class ArgumentsTest extends TestCase {
 
 
     public function testConstructFromParsedString() : void {
-        $parse = StringParser::parseString( 'foo bar' );
-        $args = new Arguments( $parse );
+        $args = new Arguments( 'foo bar' );
         self::assertEquals( 'foo', $args->shiftString() );
         self::assertEquals( 'bar', $args->shiftString() );
         self::assertTrue( $args->empty() );
@@ -209,6 +210,18 @@ class ArgumentsTest extends TestCase {
         self::assertEquals( 'Hello world!', $args->shiftString() );
         self::assertEquals( 'bar', $args->shiftString() );
         self::assertTrue( $args->empty() );
+    }
+
+
+    public function testHandleOption() : void {
+        $args = new Arguments( [ '--foo=bar', '--baz', 'Hello', '--no-qux', '--', '--quux', 'world!' ] );
+        self::assertSame( 'bar', $args->handleOption( 'foo' ) );
+
+        self::assertTrue( $args->handleOption( 'baz' ) );
+        self::assertFalse( $args->handleOption( 'qux' ) );
+        self::assertNull( $args->handleOption( 'nonexistent' ) );
+        self::assertNull( $args->handleOption( 'quux' ) );
+
     }
 
 
@@ -471,7 +484,7 @@ class ArgumentsTest extends TestCase {
         self::assertNull( $args->shiftExistingDirectory() );
 
         $args = new Arguments( [ __DIR__ . '/data/a.txt' ] );
-        static::expectException( BadArgumentException::class );
+        self::expectException( BadArgumentException::class );
         $args->shiftExistingDirectory();
     }
 
@@ -480,7 +493,7 @@ class ArgumentsTest extends TestCase {
         $args = new Arguments( [ __DIR__ . '/data' ] );
         self::assertEquals( __DIR__ . '/data', $args->shiftExistingDirectoryEx() );
         self::assertTrue( $args->empty() );
-        static::expectException( MissingArgumentException::class );
+        self::expectException( MissingArgumentException::class );
         $args->shiftExistingDirectoryEx();
     }
 
@@ -501,7 +514,7 @@ class ArgumentsTest extends TestCase {
 
     public function testShiftExistingDirectoryForNoSuchPath() : void {
         $args = new Arguments( [ '/no/such/directory/nonexistent' ] );
-        static::expectException( BadArgumentException::class );
+        self::expectException( BadArgumentException::class );
         $args->shiftExistingDirectory();
     }
 
@@ -538,7 +551,7 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftExistingFileBodyForUnreadable() : void {
-        $tmp = tempnam( sys_get_temp_dir(), 'jdwx-args-arguments-test' );
+        $tmp = OK::tempnam( sys_get_temp_dir(), 'jdwx-args-arguments-test' );
         $args = new Arguments( [ $tmp ] );
         file_put_contents( $tmp, 'foo' );
         chmod( $tmp, 0 );
@@ -621,7 +634,7 @@ class ArgumentsTest extends TestCase {
         $r = $args->shiftGlob();
         assert( is_array( $r ) );
         /** @phpstan-ignore staticMethod.alreadyNarrowedType */
-        static::assertIsArray( $r );
+        self::assertIsArray( $r );
         self::assertCount( 3, $r );
         self::assertContains( __DIR__ . '/data/a.txt', $r );
         self::assertContains( __DIR__ . '/data/b.txt', $r );
@@ -648,7 +661,7 @@ class ArgumentsTest extends TestCase {
 
     public function testShiftGlobForNoArgs() : void {
         $args = new Arguments( [] );
-        static::assertNull( $args->shiftGlob() );
+        self::assertNull( $args->shiftGlob() );
     }
 
 
@@ -662,7 +675,7 @@ class ArgumentsTest extends TestCase {
     public function testShiftGlobForNoMatchIsOK() : void {
         $args = new Arguments( [ __DIR__ . '/data/*.foo' ] );
         $r = $args->shiftGlob( true );
-        static::assertEmpty( $r );
+        self::assertEmpty( $r );
     }
 
 
@@ -690,10 +703,8 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftIPAddress() : void {
-        /** @noinspection SpellCheckingInspection */
         $args = new Arguments( [ '1.2.3.4', '1234:5678:90ab:cdef::1' ] );
         self::assertEquals( '1.2.3.4', $args->shiftIPAddress() );
-        /** @noinspection SpellCheckingInspection */
         self::assertEquals( '1234:5678:90ab:cdef::1', $args->shiftIPAddress() );
         self::assertNull( $args->shiftIPAddress() );
     }
@@ -730,7 +741,6 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftIPv4AddressForIPv6Address() : void {
-        /** @noinspection SpellCheckingInspection */
         $args = new Arguments( [ '1234:5678:90ab:cdef::1' ] );
         self::expectException( BadArgumentException::class );
         $args->shiftIPv4Address();
@@ -745,18 +755,14 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftIPv6Address() : void {
-        /** @noinspection SpellCheckingInspection */
         $args = new Arguments( [ '1234:5678:90ab:cdef::1' ] );
-        /** @noinspection SpellCheckingInspection */
         self::assertEquals( '1234:5678:90ab:cdef::1', $args->shiftIPv6Address() );
         self::assertNull( $args->shiftIPv6Address() );
     }
 
 
     public function testShiftIPv6AddressEx() : void {
-        /** @noinspection SpellCheckingInspection */
         $args = new Arguments( [ '1234:5678:90ab:cdef::1' ] );
-        /** @noinspection SpellCheckingInspection */
         self::assertEquals( '1234:5678:90ab:cdef::1', $args->shiftIPv6AddressEx() );
         self::expectException( MissingArgumentException::class );
         $args->shiftIPv6AddressEx();
@@ -778,7 +784,7 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftInteger() : void {
-        $args = new Arguments( [ '123', '456', '78.9', '0' ] );
+        $args = new Arguments( [ '123', '456', '78.0', '0' ] );
         self::assertSame( 123, $args->shiftInteger() );
         self::assertSame( 456, $args->shiftInteger() );
         self::assertSame( 78, $args->shiftInteger() );
@@ -906,7 +912,7 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftPositiveInteger() : void {
-        $args = new Arguments( [ '123', '456', '78.9' ] );
+        $args = new Arguments( [ '123', '456', '78.' ] );
         self::assertEquals( 123, $args->shiftPositiveInteger() );
         self::assertEquals( 456, $args->shiftPositiveInteger() );
         self::assertEquals( 78, $args->shiftPositiveInteger() );
@@ -952,9 +958,6 @@ class ArgumentsTest extends TestCase {
         $args->end();
         self::assertNull( $args->shiftString() );
 
-        /**
-         * @phpstan-ignore argument.type
-         */
         $args = new Arguments( [ [ 'foo', 'bar' ] ] );
         self::expectException( BadArgumentException::class );
         $args->shiftString();
@@ -971,7 +974,7 @@ class ArgumentsTest extends TestCase {
 
 
     public function testShiftUnsignedInteger() : void {
-        $args = new Arguments( [ '123', '456', '0', '78.9' ] );
+        $args = new Arguments( [ '123', '456', '0', '78.00' ] );
         self::assertEquals( 123, $args->shiftUnsignedInteger() );
         self::assertEquals( 456, $args->shiftUnsignedInteger() );
         self::assertEquals( 0, $args->shiftUnsignedInteger() );

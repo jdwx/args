@@ -56,7 +56,7 @@ All "shift" methods throw an exception if an argument exists but is invalid:
 $args = new JDWX\Args\Arguments( [ 'not-an-email-address' ] );
 try {
     $email = $args->shiftEmailAddress();
-} catch ( JDWX\Args\BadArgumentException $e) {
+} catch ( JDWX\Args\Exceptions\BadArgumentException $e) {
     echo "Not a valid email address: ", $e->getValue(), "\n";
 }
 ```
@@ -115,15 +115,13 @@ if ( $st = $args->peekKeywords( $rKeywords, i_bConsume: true ) ) {
 
 ### Parsing Arguments From Strings
 
-While the command line is the most common place where arguments are encountered, the library also provides functionality for processing arbitrary strings into lists of arguments, including robust handling of quoting and escaped characters:
+While the command line is the most common place where arguments are encountered, the library can also process entire strings into arguments. This is useful for parsing arguments from a string that might be entered in a REPL or other interactive environment.
 
 ```php
 $args = new Arguments( 'Hello, "world!"' );
 echo 'parsed arg 1 = ', $args->shiftString(), "\n"; # Echoes "Hello,"
 echo 'parsed arg 2 = ', $args->shiftString(), "\n"; # Echoes "world!" (no quotes)
 ```
-
-The ParsedString class provides a lower-level interface for interacting with parsed strings, including $variable substitution and implementing \`backtick\` replacement through callbacks. See the parser.php file in the examples directory for a simple example.
 
 ### Handling Options
 

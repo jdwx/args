@@ -8,10 +8,18 @@ namespace JDWX\Args;
 
 
 use Countable;
+use JDWX\Args\Exceptions\BadArgumentException;
+use JDWX\Args\Exceptions\ExtraArgumentsException;
+use JDWX\Args\Exceptions\ExtraOptionsException;
+use JDWX\Args\Exceptions\MissingArgumentException;
 use JDWX\Param\IParameter;
 use JDWX\Param\Parameter;
 use JDWX\Param\Parse;
 use JDWX\Param\ParseException;
+use JDWX\Quote\Operators\DelimiterOperator;
+use JDWX\Quote\Operators\QuoteOperator;
+use JDWX\Quote\Parser;
+use JDWX\Quote\ParserInterface;
 use LogicException;
 use TypeError;
 
@@ -23,26 +31,46 @@ class Arguments extends ArgumentParser implements Countable {
     protected array $args;
 
 
-    /** @param list<string>|string|ParsedString $i_args */
-    public function __construct( array|string|ParsedString $i_args ) {
+    /**
+     * @param iterable|string $i_args
+     * @phpstan-ignore missingType.iterableValue
+     */
+    public function __construct( iterable|string $i_args ) {
         if ( is_string( $i_args ) ) {
-            $i_args = StringParser::parseString( $i_args );
+            $i_args = self::parse( $i_args );
         }
-        if ( $i_args instanceof ParsedString ) {
-            $i_args = $i_args->getSegments();
-        }
-        $this->args = $i_args;
+        $this->args = iterator_to_array( $i_args );
     }
 
 
     /**
-     * You need to overload this in child classes or else it
+     * You need to overload this in child classes, or else it
      * will copy the wrong class!
      */
     public static function fromString( string $i_st ) : self {
-        $parsed = StringParser::parseString( $i_st );
         assert( static::class === self::class );
-        return new self( $parsed->getSegments() );
+        return new self( self::parse( $i_st ) );
+    }
+
+
+    protected static function makeParser() : ParserInterface {
+        return new Parser(
+            hardQuote: QuoteOperator::double(),
+            delimiter: DelimiterOperator::whitespace(),
+        );
+    }
+
+
+    /**
+     * @param string $i_st
+     * @return list<string>
+     */
+    private static function parse( string $i_st ) : array {
+        static $parser = null;
+        if ( ! $parser instanceof ParserInterface ) {
+            $parser = static::makeParser();
+        }
+        return iterator_to_array( $parser( $i_st ) );
     }
 
 
@@ -72,7 +100,7 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
-     * You need to overload this in child classes or else it
+     * You need to overload this in child classes, or else it
      * will copy the wrong class!
      */
     public function copy() : self {
@@ -265,7 +293,7 @@ class Arguments extends ArgumentParser implements Countable {
     /**
      * @param list<string> $i_rstOptions List of valid options.
      * @return array<string, mixed> The options that were defined and
-     *                              associated values given.
+     *                                   associated values given.
      *
      * Like handleOptions() but enforces a predefined list of options.
      */
@@ -288,7 +316,7 @@ class Arguments extends ArgumentParser implements Countable {
      * @param array<string, mixed> $i_rstOptions The valid options and their
      *                                           default values.
      * @return array<string, mixed> The options that were defined and
-     *                              associated values given.
+     *                                           associated values given.
      *
      * Takes an array of options and their default values. E.g.,
      * [ 'happy' => true, 'value' => 42 ]. A default string value is
@@ -315,7 +343,7 @@ class Arguments extends ArgumentParser implements Countable {
     /**
      *
      * @param list<string> $i_rKeywords The keywords to look for.
-     * @param bool $i_bConsume If true, a matched keyword is removed from the argument list.
+     * @param bool         $i_bConsume  If true, a matched keyword is removed from the argument list.
      *
      * This is similar to shiftKeywords() but does not treat a mismatch as an error,
      * instead returning null. Unlike peekString(), this method returns the whole match
@@ -346,13 +374,13 @@ class Arguments extends ArgumentParser implements Countable {
      * If a prefix is specified, the $i_bConsume flag indicates whether it
      * should be removed from the argument list.
      *
-     * This is useful for parsing arguments that are optional, but have a specific
+     * This is useful for parsing arguments that are optional but have a specific
      * position in the argument list. For example, something that changes how
      * subsequent arguments will be handled if (and only if) it is present.  If it's
      * present, you want to know that. But if it's not, you don't want to mess up
      * another argument finding that out.
      *
-     * It is not valid to use consume without a prefix. Doing so is equivalent to
+     * It is not valid to use $i_bConsume without a prefix. Doing so is equivalent to
      * using the shiftString() method.
      *
      * If no arguments remain, or if the next argument doesn't match the prefix,
@@ -382,10 +410,10 @@ class Arguments extends ArgumentParser implements Countable {
     /**
      * @param string $i_stExpected The string that is expected to be the next
      *                             argument.
-     * @param bool $i_bConsume If true, a matching argument is removed from
-     *                         the list.
+     * @param bool   $i_bConsume   If true, a matching argument is removed from
+     *                             the list.
      * @return bool True if the next argument matches/matched the expected
-     *              string.
+     *                             string.
      *
      * This is used to check if the next argument is a specific string. If
      * it is, the argument is (by default) removed from the list. If it is
@@ -524,7 +552,7 @@ class Arguments extends ArgumentParser implements Countable {
     /**
      * Similar to shiftExistingFilename() but returns the contents
      * of the specified file instead of the filename. Optionally stores
-     * the filename into the string argument, if one is given.
+     * the filename into the string argument if one is given.
      */
     public function shiftExistingFileBody( ?string &$o_nstFilename = null ) : ?string {
         $np = $this->shift();
@@ -538,7 +566,7 @@ class Arguments extends ArgumentParser implements Countable {
     /**
      * Similar to shiftExistingFilenameEx() but returns the contents
      * of the specified file instead of the filename. Optionally stores
-     * the filename into the string argument, if one is given.
+     * the filename into the string argument if one is given.
      */
     public function shiftExistingFileBodyEx( ?string &$o_nstFilename = null, ?string $i_nstRequired = null ) : string {
         $st = $this->shiftExistingFilenameEx( $i_nstRequired );
@@ -572,7 +600,7 @@ class Arguments extends ArgumentParser implements Countable {
      * Expects a string argument that parses to a floating-point value (optionally,
      * within a specified range).
      *
-     * Unlike shiftInteger() the range is half-open (i.e., the minimum is inclusive
+     * Unlike shiftInteger(), the range is half-open (i.e., the minimum is inclusive
      * and the maximum is exclusive).  This is because the interval [0, 1) is a
      * common use case.
      */
@@ -599,12 +627,12 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
-     * Expects a string argument that is a glob pattern. The glob is expanded
+     * Expects a string argument that is a glob pattern. The glob is expanded,
      * and the resulting list of files is returned.
      *
      * @param bool $i_bAllowEmpty If true, an empty glob is allowed.
      * @return list<string>|null The list of files that match the glob, or null if
-     *                   no argument is available.
+     *                            no argument is available.
      */
     public function shiftGlob( bool $i_bAllowEmpty = false ) : ?array {
         $np = $this->shift();
@@ -616,7 +644,7 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
-     * Expects a string argument that is a glob pattern. The glob is expanded
+     * Expects a string argument that is a glob pattern. The glob is expanded,
      * and the resulting list of files is returned.
      *
      * @param bool $i_bAllowEmpty If true, an empty glob is allowed.
@@ -754,7 +782,7 @@ class Arguments extends ArgumentParser implements Countable {
     /**
      * @param string[] $i_rMap An array of keywords and values.
      * @return string|null The value associated with the keyword, or null if
-     *                     the keyword is missing.
+     *                         the keyword is missing.
      *
      * This is similar to shiftKeyword() but compares to the keys of $i_rMap
      * instead of the values, and returns the value of the matching key.
@@ -797,7 +825,7 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
-     * Expects an argument specifying a filename that does not currently exist,
+     * Expects an argument specifying a filename that does not currently exist
      * but could be created. E.g., any referenced parent directories must exist.
      */
     public function shiftNonexistentFilename() : ?string {
@@ -811,7 +839,7 @@ class Arguments extends ArgumentParser implements Countable {
 
 
     /**
-     * Expects an argument specifying a filename that does not currently exist,
+     * Expects an argument specifying a filename that does not currently exist
      * but could be created. E.g., any referenced parent directories must exist.
      */
     public function shiftNonexistentFilenameEx( ?string $i_nstRequired = null ) : string {

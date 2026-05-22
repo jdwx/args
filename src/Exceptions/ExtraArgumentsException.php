@@ -4,7 +4,7 @@
 declare( strict_types = 1 );
 
 
-namespace JDWX\Args;
+namespace JDWX\Args\Exceptions;
 
 
 use Throwable;

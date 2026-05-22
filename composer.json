@@ -8,12 +8,21 @@
     }
   },
   "require": {
-    "php": ">=8.2.0",
+    "php": ">=8.3.0",
     "ext-mbstring": "*",
-    "jdwx/param": "^1.1"
+    "jdwx/param": "^1.2.5",
+    "jdwx/quote": "^1.0"
   },
   "require-dev": {
+    "roave/security-advisories": "dev-latest",
     "jetbrains/phpstorm-attributes": "^1.0",
-    "phpunit/phpunit": "^9.5"
+    "phpunit/phpunit": "^12",
+    "phan/phan": "^v6",
+    "phpstan/phpstan": "^2.0"
+  },
+  "scripts": {
+    "phan": "PHAN_ALLOW_XDEBUG=1 php -d xdebug.mode=off vendor/bin/phan --no-progress-bar -S --analyze-twice",
+    "phpstan": "php -d xdebug.so vendor/bin/phpstan --no-progress",
+    "phpunit": "vendor/bin/phpunit tests"
   }
 }

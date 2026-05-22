@@ -5,15 +5,18 @@ declare( strict_types = 1 );
 
 
 use JDWX\Args\Arguments;
-use JDWX\Args\ExtraOptionsException;
+use JDWX\Args\Exceptions\ExtraOptionsException;
 use JDWX\Args\Option;
 use JDWX\Args\Options;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 
+#[CoversClass( Options::class )]
 final class OptionsTest extends TestCase {
 
 
+    /** @suppress PhanPossiblyNonClassMethodCall */
     public function testAdd() : void {
         $opt = new Option( 'foo', i_xValue: 'bar' );
         $options = new Options();
@@ -22,6 +25,7 @@ final class OptionsTest extends TestCase {
     }
 
 
+    /** @suppress PhanPossiblyNonClassMethodCall */
     public function testFromArguments() : void {
         $options = new Options( [
             new Option( 'foo', i_xValue: 'bar' ),
@@ -34,6 +38,7 @@ final class OptionsTest extends TestCase {
     }
 
 
+    /** @suppress PhanPossiblyNonClassMethodCall */
     public function testFromArgumentsForExtraOptions() : void {
         $options = new Options( [
             new Option( 'foo', i_xValue: 'bar' ),
@@ -45,6 +50,7 @@ final class OptionsTest extends TestCase {
     }
 
 
+    /** @suppress PhanPossiblyNonClassMethodCall */
     public function testFromArgumentsForStopper() : void {
         $options = new Options( [
             new Option( 'foo', i_xValue: 'bar' ),
@@ -58,6 +64,7 @@ final class OptionsTest extends TestCase {
     }
 
 
+    /** @suppress PhanPossiblyNonClassMethodCall */
     public function testFromArray() : void {
         $options = new Options( [
             new Option( 'foo', i_bFlagOnly: false ),
@@ -77,6 +84,7 @@ final class OptionsTest extends TestCase {
     }
 
 
+    /** @suppress PhanPossiblyNonClassMethodCall */
     public function testOffsetGet() : void {
         $opt = new Option( 'foo', i_xValue: 'bar' );
         $options = new Options( [ $opt ] );
@@ -101,6 +109,7 @@ final class OptionsTest extends TestCase {
     }
 
 
+    /** @suppress PhanPossiblyNonClassMethodCall */
     public function testOffsetUnset() : void {
         $opt = new Option( 'foo', i_xValue: 'bar' );
         $options = new Options( [ $opt ] );

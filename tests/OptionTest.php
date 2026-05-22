@@ -5,12 +5,14 @@ declare( strict_types = 1 );
 
 
 use JDWX\Args\Arguments;
-use JDWX\Args\BadOptionException;
-use JDWX\Args\MissingOptionException;
+use JDWX\Args\Exceptions\BadOptionException;
+use JDWX\Args\Exceptions\MissingOptionException;
 use JDWX\Args\Option;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 
+#[CoversClass( Option::class )]
 final class OptionTest extends TestCase {
 
 
@@ -93,6 +95,11 @@ final class OptionTest extends TestCase {
         $opt = new Option( 'foo', i_bFlagOnly: true );
         self::expectException( LogicException::class );
         $opt->asString();
+    }
+
+
+    public function testName() : void {
+        self::assertSame( 'foo', ( new Option( 'foo' ) )->name() );
     }
 
 

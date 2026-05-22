@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 namespace JDWX\Args;
 
 
+use JDWX\Args\Exceptions\BadOptionException;
+use JDWX\Args\Exceptions\MissingOptionException;
 use JDWX\Param\IParameter;
 use JDWX\Param\Parameter;
 use JDWX\Param\Parse;
@@ -39,9 +41,9 @@ class Option {
      * This doesn't work like the other simple methods because Option does
      * not natively support arrays.
      *
-     * @param string $i_stName The name of the option.
-     * @param Arguments|list<string> $i_xValue An argument list or list of already-found matching values.
-     * @param bool $i_bRequired Whether at least one value is required.
+     * @param string                 $i_stName    The name of the option.
+     * @param Arguments|list<string> $i_xValue    An argument list or list of already-found matching values.
+     * @param bool                   $i_bRequired Whether at least one value is required.
      * @return list<string> The list of matching values.
      */
     public static function simpleArray( string $i_stName, Arguments|array $i_xValue,
