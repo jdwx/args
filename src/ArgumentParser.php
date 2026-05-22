@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 namespace JDWX\Args;
 
 
+use JDWX\Args\Exceptions\BadArgumentException;
 use JDWX\Param\Parse;
 use JDWX\Param\ParseException;
 
@@ -44,7 +45,7 @@ class ArgumentParser {
 
 
     /**
-     * @noinspection PhpUsageOfSilenceOperatorInspection
+     * @noinspection   PhpUsageOfSilenceOperatorInspection
      * @phpstan-ignore parameterByRef.unusedType
      */
     public static function parseExistingFileBody( string $i_st, ?string &$o_stFilename ) : string {
